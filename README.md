@@ -15,9 +15,9 @@ The Tree Structure forces the coordinators to always be responsible of their own
 ## How?
 
 - Using Coordinator Components
- - Stack
- - Sequence
- - Screen
+   - Stack
+   - Sequence
+   - Screen
 - Composition over inheritance
 - Async / Await
 - Presentation
