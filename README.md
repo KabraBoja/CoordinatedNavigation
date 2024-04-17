@@ -1,8 +1,8 @@
 # What is Coordinated Navigation?
 
-Coordinated Navigation is a Swift library that enables navigating between screens using a navigation tree structure where every node doesn’t need to know each other.
+Coordinated Navigation is a Swift library that enables **navigating** between screens using a navigation **tree structure** where every node doesn’t need to know each other.
 
-Implemented in SwiftUI (iOS 16 Navigation Stack) uses a Coordinator Pattern approach.
+Implemented in SwiftUI (iOS 16 **Navigation Stack**) uses a **Coordinator Pattern** approach.
 
 ![Example](./ExampleCoordinatorsApp.jpg)
 
@@ -12,7 +12,7 @@ The coordinator pattern establishes who is responsible of navigating in a very c
 
 As a developer I’ve faced many projects where this responsibility is not clear enough.
 
-The Tree Structure forces the coordinators to always be responsible of their own funnel and their direct children. This helps us to follow the single responsibility principle.
+The Tree Structure forces the coordinators to always be responsible of their **own funnel** and their **direct children**. This helps us to follow the **single responsibility principle**.
 
 ## How?
 
@@ -28,9 +28,9 @@ The Tree Structure forces the coordinators to always be responsible of their own
 ### Stack Coordinator
 A Stack Coordinator coordinates a navigation stack. It's used as the entry point of the app or a modal presentation.
 
-Contains a NavigationStack view (Tree structure root).
-Transitions between a root View and a Sequence.
-Can only set/pop a Sequence.
+- Contains a NavigationStack view (Tree structure root).
+- Transitions between a root View and a Sequence.
+- Can only set/pop a Sequence.
 
 
 Example: The root view could be an splash screen. As soon as the app loads some needed stuff, the Stack Coordinator sets the first Sequence Coordinator.
