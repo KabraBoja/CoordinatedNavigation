@@ -142,7 +142,7 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
 
     @MainActor
     func destroyComponent() async {
-        print("Screen destroyed")
+        //print("Screen destroyed")
         presentingComponent = nil
         view = nil
     }
@@ -562,7 +562,7 @@ public class SequenceCoordinatorComponent: ObservableObject, Component {
 
     @MainActor
     func destroyComponent() async {
-        print("Sequence destroyed")
+//        print("Sequence destroyed")
         parent = nil
         for child in childCoordinators {
             switch child {
