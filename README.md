@@ -4,6 +4,8 @@ Coordinated Navigation is a Swift library that enables navigating between screen
 
 Implemented in SwiftUI (iOS 16 Navigation Stack) uses a Coordinator Pattern approach.
 
+![Example](./ExampleCoordinatorsApp.jpg)
+
 ## Why?
 
 The coordinator pattern establishes who is responsible of navigating in a very clear way.
