@@ -64,16 +64,16 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
 
     public init() {}
 
-    public init(view: AnyView) {
-        self.view = view
+    public init(view: some View) {
+        self.view = view.toAnyView()
     }
 
     public func getView() -> AnyView {
         ContentView(screenComponent: self).toAnyView()
     }
 
-    public func setView(_ view: AnyView) {
-        self.view = view
+    public func setView(_ view: some View) {
+        self.view = view.toAnyView()
     }
 
     @MainActor
@@ -235,15 +235,15 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
         updatePath()
     }
 
-    public init(rootView: AnyView) {
-        self.rootView = rootView
+    public init(rootView: some View) {
+        self.rootView = rootView.toAnyView()
         self.sequenceCoordinator = nil
         self.navigationPath = NavigationPath()
         updatePath()
     }
 
-    public init(rootView: AnyView, sequence: SequenceCoordinatorEntity) {
-        self.rootView = rootView
+    public init(rootView: some View, sequence: SequenceCoordinatorEntity) {
+        self.rootView = rootView.toAnyView()
         self.sequenceCoordinator = sequence
         self.navigationPath = NavigationPath()
         updatePath()
@@ -275,8 +275,8 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
         }
     }
 
-    public func setRootView(_ view: AnyView) {
-        self.rootView = view
+    public func setRootView(_ view: some View) {
+        self.rootView = view.toAnyView()
     }
 
     @MainActor
