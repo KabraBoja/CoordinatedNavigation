@@ -64,7 +64,7 @@ Why use a coordinator for a simple screen (view)?
 
 ## Next Steps?
 
-- [ ] Upload an example project (WIP)
+- [x] Upload an example project.
 - [ ] Try to use any View instead of AnyView.
 - [ ] Add routes and builder pattern (typed navigation).
 - [ ] Modal Presentation could also happen from the Stack coordinator.
