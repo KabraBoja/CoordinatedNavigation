@@ -225,32 +225,16 @@ enum PathRepresentation {
 public class StackCoordinatorComponent: ObservableObject, ViewComponent {
 
     public let navigationId: CoordinatorID = CoordinatorID()
-    //@Published var rootView: AnyView
+
     @Published var navigationPath: NavigationPath
     @Published var sequenceCoordinator: SequenceCoordinatorEntity?
 
     public init() {
-        //self.rootView = EmptyView().toAnyView()
         self.navigationPath = NavigationPath()
         updatePath()
     }
 
-    //    public init(rootView: some View) {
-    //        //self.rootView = rootView.toAnyView()
-    //        self.sequenceCoordinator = nil
-    //        self.navigationPath = NavigationPath()
-    //        updatePath()
-    //    }
-
-    //    public init(rootView: some View, sequence: SequenceCoordinatorEntity) {
-    //        //self.rootView = rootView.toAnyView()
-    //        self.sequenceCoordinator = sequence
-    //        self.navigationPath = NavigationPath()
-    //        updatePath()
-    //    }
-
     public init(sequence: SequenceCoordinatorEntity) {
-        //self.rootView = rootView.toAnyView()
         self.sequenceCoordinator = sequence
         self.navigationPath = NavigationPath()
         updatePath()
@@ -269,10 +253,6 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
         }
 
         var body: some View {
-            createView()
-        }
-
-        func createView() -> some View {
             NavigationStack(path: $coordinator.navigationPath) {
                 if coordinator.sequenceCoordinator != nil, let firstView = coordinator.getFirstCoordinatorView() {
                     firstView.navigationDestination(for: UUID.self) { item in
@@ -287,23 +267,6 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
             }
         }
     }
-    //                coordinator.rootView.navigationDestination(for: UUID.self) { item in
-    //                    coordinator.getCoordinatorView(item)
-    //                        .onDisappear {
-    //                            Task { @MainActor in
-    //                                let path = coordinator.navigationPath.getPathRepresentation()
-    //                                await coordinator.removeUnusedCoordinators(path: path)
-    //                            }
-    //                        }
-    //                }
-    //            .onChange(of: coordinator.navigationPath) { newValue in
-    //                let path = coordinator.navigationPath.getPathRepresentation()
-    //                print("Path changed to \(path)")
-    //            }
-
-    //    public func setRootView(_ view: some View) {
-    //        self.rootView = view.toAnyView()
-    //    }
 
     @MainActor
     public func set(sequence: SequenceCoordinatorEntity) async {
@@ -378,7 +341,6 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
     @MainActor
     func destroyComponent() async {
         await pop()
-        //        self.rootView = EmptyView().toAnyView()
     }
 }
 
