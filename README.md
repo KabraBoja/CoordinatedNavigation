@@ -65,8 +65,8 @@ Why use a coordinator for a simple screen (view)?
 ## Next Steps?
 
 - [x] Upload an example project.
+- [x] Does it makes sense to have a RootView in the Stack? Maybe use an Screen coordinator directly.
 - [ ] Try to use any View instead of AnyView.
 - [ ] Add routes and builder pattern (typed navigation).
 - [ ] Modal Presentation could also happen from the Stack coordinator.
 - [ ] Explore if I can merge the Stack with the Sequence.
-- [ ] Does it makes sense to have a RootView in the Stack? Maybe use an Screen coordinator directly.
