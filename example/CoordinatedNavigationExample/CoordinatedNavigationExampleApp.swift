@@ -7,24 +7,25 @@ struct CoordinatedNavigationExampleApp: App {
     enum ExampleCase {
         case exampleA
         case exampleB
+        case exampleC
     }
 
-    let exampleCase: ExampleCase = .exampleB
-
-    let stackCoordinator: StackCoordinatorEntity
-
-    init() {
-        switch exampleCase {
-        case .exampleA:
-            stackCoordinator = ExampleA.RootStackCoordinator()
-        case .exampleB:
-            stackCoordinator = ExampleB.RootStackCoordinator()
-        }
-    }
+    let exampleCase: ExampleCase = .exampleC
 
     var body: some Scene {
         WindowGroup {
-            stackCoordinator.getView()
+            AsyncViewCoordinator(loadingView: SplashScreen()) { () -> ViewEntity in
+                return switch exampleCase {
+                case .exampleA:
+                    ExampleA.RootStackCoordinator()
+                case .exampleB:
+                    ExampleB.RootStackCoordinator()
+                case .exampleC:
+                    await ExampleC.CustomTabBarCoordinator()
+                }
+            }.getView()
         }
     }
 }
+
+

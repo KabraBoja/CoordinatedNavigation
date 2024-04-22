@@ -4,16 +4,6 @@ import CoordinatedNavigation
 
 struct ExampleA { // Namespace
 
-    struct SplashScreen: View {
-        var body: some View {
-            VStack {
-                Text("Example A")
-                Text("Splash Screen")
-                ProgressView()
-            }
-        }
-    }
-
     class RootStackCoordinator: StackCoordinatorEntity {
         let navigationComponent: StackCoordinatorComponent = StackCoordinatorComponent(rootView: SplashScreen())
 
