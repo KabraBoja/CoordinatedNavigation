@@ -12,8 +12,8 @@ struct ExampleC {
         @Published var secondTabCoordinator: ViewEntity
 
         init() async {
-            firstTabCoordinator = await FirstTabStackCoordinator()
-            secondTabCoordinator = SecondTabStackCoordinator()
+            firstTabCoordinator = await SimpleStackCoordinator(sequenceCoordinator: FirstTabSequenceCoordinator())
+            secondTabCoordinator = await SimpleStackCoordinator(sequenceCoordinator: SimpleSequenceCoordinator(screenCoordinator: SimpleTitleScreenCoordinator(title: "Second Tab")))
             navigationComponent.setView(ContentView(coordinator: self))
         }
 
@@ -34,18 +34,6 @@ struct ExampleC {
         deinit {
             print("DESTROYED")
         }
-    }
-
-    class FirstTabStackCoordinator: StackCoordinatorEntity {
-        let navigationComponent: StackCoordinatorComponent = StackCoordinatorComponent(rootView: Text("Tab Label 1"))
-
-        init() async {
-            await navigationComponent.set(sequence: FirstTabSequenceCoordinator())
-        }
-    }
-
-    class SecondTabStackCoordinator: StackCoordinatorEntity {
-        let navigationComponent: StackCoordinatorComponent = StackCoordinatorComponent(rootView: Text("Tab Label 2"))
     }
 
     class FirstTabSequenceCoordinator: SequenceCoordinatorEntity {

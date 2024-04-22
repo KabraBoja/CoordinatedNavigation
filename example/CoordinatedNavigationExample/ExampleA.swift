@@ -5,13 +5,10 @@ import CoordinatedNavigation
 struct ExampleA { // Namespace
 
     class RootStackCoordinator: StackCoordinatorEntity {
-        let navigationComponent: StackCoordinatorComponent = StackCoordinatorComponent(rootView: SplashScreen())
+        let navigationComponent: StackCoordinatorComponent = StackCoordinatorComponent()
 
-        init() {
-            Task { @MainActor in
-                try await Task.sleep(for: .seconds(2))
-                await navigationComponent.set(sequence: RootSequenceCoordinator())
-            }
+        init() async {
+            await navigationComponent.set(sequence: RootSequenceCoordinator())
         }
     }
 

@@ -10,14 +10,14 @@ struct CoordinatedNavigationExampleApp: App {
         case exampleC
     }
 
-    let exampleCase: ExampleCase = .exampleC
+    let exampleCase: ExampleCase = .exampleA
 
     var body: some Scene {
         WindowGroup {
             AsyncViewCoordinator(loadingView: SplashScreen()) { () -> ViewEntity in
                 return switch exampleCase {
                 case .exampleA:
-                    ExampleA.RootStackCoordinator()
+                    await ExampleA.RootStackCoordinator()
                 case .exampleB:
                     ExampleB.RootStackCoordinator()
                 case .exampleC:

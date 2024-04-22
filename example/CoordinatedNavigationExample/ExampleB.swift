@@ -9,23 +9,7 @@ struct ExampleB { // Namespace
         //let splashScreenCoordinator: CustomScreenCoordinator // We can also use a coordinator to hold a View
 
         init() {
-            let splashScreenCoordinator = CustomScreenCoordinator(title: "Splash Screen", actions: [], isBackAllowed: false)
-//            self.splashScreenCoordinator = splashScreenCoordinator
-            splashScreenCoordinator.actions = [
-                CustomScreenCoordinator.Action(id: "Deeplink: Simple Post", closure: { [weak self] in
-                    guard let self else { return }
-                    await navigationComponent.set(sequence: RootSequenceCoordinator(deepLink: .simplePost))
-                }),
-                CustomScreenCoordinator.Action(id: "Deeplink: Deep Recommended Post", closure: { [weak self] in
-                    guard let self else { return }
-                    await navigationComponent.set(sequence: RootSequenceCoordinator(deepLink: .deepPost))
-                }),
-                CustomScreenCoordinator.Action(id: "Deeplink: Present Login", closure: { [weak self] in
-                    guard let self else { return }
-                    await navigationComponent.set(sequence: RootSequenceCoordinator(deepLink: .presentLogin))
-                }),
-            ]
-            navigationComponent.setRootView(splashScreenCoordinator.getView())
+
         }
     }
 
@@ -38,25 +22,46 @@ struct ExampleB { // Namespace
             case presentLogin
         }
 
-        init(deepLink: DeeplinkExample) async {
-            switch deepLink {
-            case .simplePost:
-                await navigationComponent.set(screen: SimpleTitleScreenCoordinator(title: "Simple Post"))
-            case .deepPost:
-                await navigationComponent.set(sequence: OnboardingSequenceCoordinator())
-                await navigationComponent.push(sequence: AuthenticationSequenceCoordinator())
-                await navigationComponent.push(sequence: FeedSequenceCoordinator())
-                await navigationComponent.push(screen: SimpleTitleScreenCoordinator(title: "Recommended Post"))
-            case .presentLogin:
-                let simpleScreen = SimpleTitleScreenCoordinator(title: "Step 3 Presents")
-                await navigationComponent.set(screens: [
-                    SimpleTitleScreenCoordinator(title: "Step 1"),
-                    SimpleTitleScreenCoordinator(title: "Step 2"),
-                    simpleScreen
-                ])
+        init() async {
+            let splashScreenCoordinator = CustomScreenCoordinator(title: "Splash Screen", actions: [], isBackAllowed: false)
+            splashScreenCoordinator.actions = [
+                CustomScreenCoordinator.Action(id: "Deeplink: Simple Post", closure: { [weak self] in
+                    guard let self else { return }
+                    self.deeplinkPressed(deepLink: .simplePost)
+                }),
+                CustomScreenCoordinator.Action(id: "Deeplink: Deep Recommended Post", closure: { [weak self] in
+                    guard let self else { return }
+                    self.deeplinkPressed(deepLink: .deepPost)
+                }),
+                CustomScreenCoordinator.Action(id: "Deeplink: Present Login", closure: { [weak self] in
+                    guard let self else { return }
+                    self.deeplinkPressed(deepLink: .presentLogin)
+                }),
+            ]
+            await navigationComponent.set(screen: splashScreenCoordinator)
+        }
 
-                let authenticateStack = await AuthenticationStackCoordinator()
-                await simpleScreen.navigationComponent.getPresentingComponent().present(stack: authenticateStack, mode: .sheet)
+        func deeplinkPressed(deepLink: DeeplinkExample) {
+            Task {
+                switch deepLink {
+                case .simplePost:
+                    await navigationComponent.push(screen: SimpleTitleScreenCoordinator(title: "Simple Post"))
+                case .deepPost:
+                    await navigationComponent.push(sequence: OnboardingSequenceCoordinator())
+                    await navigationComponent.push(sequence: AuthenticationSequenceCoordinator())
+                    await navigationComponent.push(sequence: FeedSequenceCoordinator())
+                    await navigationComponent.push(screen: SimpleTitleScreenCoordinator(title: "Recommended Post"))
+                case .presentLogin:
+                    let simpleScreen = SimpleTitleScreenCoordinator(title: "Step 3 Presents")
+                    await navigationComponent.push(screens: [
+                        SimpleTitleScreenCoordinator(title: "Step 1"),
+                        SimpleTitleScreenCoordinator(title: "Step 2"),
+                        simpleScreen
+                    ])
+
+                    let authenticateStack = await AuthenticationStackCoordinator()
+                    await simpleScreen.navigationComponent.getPresentingComponent().present(stack: authenticateStack, mode: .sheet)
+                }
             }
         }
     }
