@@ -2,7 +2,7 @@ import Foundation
 import CoordinatedNavigation
 import SwiftUI
 
-struct ExampleC {
+struct ExampleC { // Namespace
 
     class CustomTabBarCoordinator: ScreenCoordinatorEntity, ObservableObject {
         let navigationComponent: ScreenCoordinatorComponent = ScreenCoordinatorComponent()
@@ -12,8 +12,8 @@ struct ExampleC {
         @Published var secondTabCoordinator: ViewEntity
 
         init() async {
-            firstTabCoordinator = await SimpleStackCoordinator(sequenceCoordinator: FirstTabSequenceCoordinator())
-            secondTabCoordinator = await SimpleStackCoordinator(sequenceCoordinator: SimpleSequenceCoordinator(screenCoordinator: SimpleTitleScreenCoordinator(title: "Second Tab")))
+            firstTabCoordinator = await DefaultStackCoordinator(sequenceCoordinator: FirstTabSequenceCoordinator())
+            secondTabCoordinator = await DefaultStackCoordinator(sequenceCoordinator: DefaultSequenceCoordinator(screenCoordinator: SimpleTitleScreenCoordinator(title: "Second Tab")))
             navigationComponent.setView(ContentView(coordinator: self))
         }
 
@@ -22,9 +22,7 @@ struct ExampleC {
             @ObservedObject var coordinator: CustomTabBarCoordinator
 
             var body: some View {
-                //                coordinator.firstTabCoordinator.getView()
-                TabView(selection: $coordinator.selectedTab,
-                        content:  {
+                TabView(selection: $coordinator.selectedTab, content:  {
                     coordinator.firstTabCoordinator.getView().tabItem { Text("Tab 1") }.tag(0)
                     coordinator.secondTabCoordinator.getView().tabItem { Text("Tab 2")  }.tag(1)
                 })
@@ -32,7 +30,7 @@ struct ExampleC {
         }
 
         deinit {
-            print("DESTROYED")
+            print("CustomTabBarCoordinator: DEINIT")
         }
     }
 

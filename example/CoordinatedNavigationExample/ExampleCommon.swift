@@ -8,22 +8,6 @@ class DebugPrinter {
     static var printerAttached: Bool = false
 }
 
-class SimpleStackCoordinator: StackCoordinatorEntity {
-    let navigationComponent: StackCoordinatorComponent = StackCoordinatorComponent()
-
-    init(sequenceCoordinator: SequenceCoordinatorEntity) async {
-        await navigationComponent.set(sequence: sequenceCoordinator)
-    }
-}
-
-class SimpleSequenceCoordinator: SequenceCoordinatorEntity {
-    let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
-
-    init(screenCoordinator: ScreenCoordinatorEntity) async {
-        await navigationComponent.set(screen: screenCoordinator)
-    }
-}
-
 class SimpleTitleScreenCoordinator: ScreenCoordinatorEntity {
     let navigationComponent: ScreenCoordinatorComponent = ScreenCoordinatorComponent()
 

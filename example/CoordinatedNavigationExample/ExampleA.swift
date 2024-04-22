@@ -4,14 +4,6 @@ import CoordinatedNavigation
 
 struct ExampleA { // Namespace
 
-    class RootStackCoordinator: StackCoordinatorEntity {
-        let navigationComponent: StackCoordinatorComponent = StackCoordinatorComponent()
-
-        init() async {
-            await navigationComponent.set(sequence: RootSequenceCoordinator())
-        }
-    }
-
     class RootSequenceCoordinator: SequenceCoordinatorEntity {
         let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
         let isFirstAppLaunch: Bool = true
@@ -53,9 +45,8 @@ struct ExampleA { // Namespace
                 CustomScreenCoordinator.Action(id: "Login", closure: { [weak screenCoordinator] in
                     guard let screenCoordinator else { return }
                     await screenCoordinator.navigationComponent.getPresentingComponent().present(
-                        stack: RootStackCoordinator(),
+                        stack: DefaultStackCoordinator(sequenceCoordinator: RootSequenceCoordinator()),
                         mode: .sheet
-                        //                    screen: CustomScreenCoordinator(title: "Presented Screen", actions: [], isBackAllowed: true)
                     )
                 })
             ]

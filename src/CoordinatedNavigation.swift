@@ -148,7 +148,6 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
     }
 }
 
-
 // Known Apple Memory leak bug: https://developer.apple.com/forums/thread/737967?answerId=767599022#767599022
 public class PresentingScreenCoordinatorComponent: ObservableObject {
 
@@ -676,7 +675,7 @@ public struct NavigationTree {
     }
 }
 
-/// Use this coordinator to initialize a ViewEntity asynchronously.
+/// Use this coordinator to initialize a ViewEntity using async/await.
 public class AsyncViewCoordinator<LoadingViewType: View>: ObservableObject {
 
     @Published var loadedCoordinator: ViewEntity?
@@ -704,5 +703,43 @@ public class AsyncViewCoordinator<LoadingViewType: View>: ObservableObject {
                 loadingView
             }
         }
+    }
+}
+
+public class DefaultStackCoordinator: StackCoordinatorEntity {
+    public let navigationComponent: StackCoordinatorComponent = StackCoordinatorComponent()
+
+    public init() {}
+
+    public init(sequenceCoordinator: SequenceCoordinatorEntity) async {
+        await navigationComponent.set(sequence: sequenceCoordinator)
+    }
+}
+
+public class DefaultSequenceCoordinator: SequenceCoordinatorEntity {
+    public let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
+
+    public init() {}
+
+    public init(screenCoordinator: ScreenCoordinatorEntity) async {
+        await navigationComponent.set(screen: screenCoordinator)
+    }
+
+    public init(screenCoordinators: [ScreenCoordinatorEntity]) async {
+        await navigationComponent.set(screens: screenCoordinators)
+    }
+
+    public init(sequenceCoordinator: SequenceCoordinatorEntity) async {
+        await navigationComponent.set(sequence: sequenceCoordinator)
+    }
+}
+
+public class DefaultScreenCoordinator: ScreenCoordinatorEntity {
+    public let navigationComponent: ScreenCoordinatorComponent = ScreenCoordinatorComponent()
+
+    public init() {}
+
+    public init(view: some View) {
+        navigationComponent.setView(view)
     }
 }

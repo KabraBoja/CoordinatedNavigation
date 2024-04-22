@@ -4,15 +4,6 @@ import CoordinatedNavigation
 
 struct ExampleB { // Namespace
 
-    class RootStackCoordinator: StackCoordinatorEntity {
-        let navigationComponent: StackCoordinatorComponent = StackCoordinatorComponent()
-        //let splashScreenCoordinator: CustomScreenCoordinator // We can also use a coordinator to hold a View
-
-        init() {
-
-        }
-    }
-
     class RootSequenceCoordinator: SequenceCoordinatorEntity {
         let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
 
