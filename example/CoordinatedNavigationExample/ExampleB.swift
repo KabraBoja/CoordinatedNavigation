@@ -11,6 +11,7 @@ struct ExampleB { // Namespace
             case simplePost
             case deepPost
             case presentLogin
+            case chainedPresentations
         }
 
         init() async {
@@ -27,6 +28,10 @@ struct ExampleB { // Namespace
                 CustomScreenCoordinator.Action(id: "Deeplink: Present Login", closure: { [weak self] in
                     guard let self else { return }
                     self.deeplinkPressed(deepLink: .presentLogin)
+                }),
+                CustomScreenCoordinator.Action(id: "Deeplink: Chained presentations", closure: { [weak self] in
+                    guard let self else { return }
+                    self.deeplinkPressed(deepLink: .chainedPresentations)
                 }),
             ]
             await navigationComponent.set(screen: splashScreenCoordinator)
@@ -52,6 +57,24 @@ struct ExampleB { // Namespace
 
                     let authenticateStack = await AuthenticationStackCoordinator()
                     await simpleScreen.navigationComponent.getPresentingComponent().present(stack: authenticateStack, mode: .sheet)
+                case .chainedPresentations:
+                    let presentingScreen0 = SimpleTitleScreenCoordinator(title: "Presenting Screen 0")
+                    await navigationComponent.push(screen: presentingScreen0)
+
+                    let presentingScreen1 = SimpleTitleScreenCoordinator(title: "Presenting Screen 1")
+                    let presentedSequence1 = await DefaultSequenceCoordinator(screenCoordinator: presentingScreen1)
+                    let presentedStack1 = await DefaultStackCoordinator(sequenceCoordinator: presentedSequence1)
+                    await presentingScreen0.navigationComponent.getPresentingComponent().present(stack: presentedStack1, mode: .sheet)
+
+                    let presentingScreen2 = SimpleTitleScreenCoordinator(title: "Presenting Screen 2")
+                    let presentedSequence2 = await DefaultSequenceCoordinator(screenCoordinator: presentingScreen2)
+                    let presentedStack2 = await DefaultStackCoordinator(sequenceCoordinator: presentedSequence2)
+                    await presentingScreen1.navigationComponent.getPresentingComponent().present(stack: presentedStack2, mode: .sheet)
+
+                    let presentingScreen3 = SimpleTitleScreenCoordinator(title: "Presenting Screen 3")
+                    let presentedSequence3 = await DefaultSequenceCoordinator(screenCoordinator: presentingScreen3)
+                    let presentedStack3 = await DefaultStackCoordinator(sequenceCoordinator: presentedSequence3)
+                    await presentingScreen2.navigationComponent.getPresentingComponent().present(stack: presentedStack3, mode: .sheet)
                 }
             }
         }

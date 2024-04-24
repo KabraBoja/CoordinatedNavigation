@@ -93,9 +93,7 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
 
         var body: some View {
             if coordinator.wasInitialized, let presentingComponent = coordinator.presentingComponent {
-                PresentingView(presentingComponent: presentingComponent, content: getView()).task {
-                    coordinator.wasInitialized = true
-                }
+                PresentingScreenCoordinatorComponent.PresentingView(presentingComponent: presentingComponent, content: getView())
             } else {
                 getView().task {
                     coordinator.wasInitialized = true
@@ -109,39 +107,6 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
             } else {
                 EmptyView().toAnyView()
             }
-        }
-    }
-
-    struct PresentingView: View {
-        @ObservedObject var presentingComponent: PresentingScreenCoordinatorComponent
-        var content: AnyView
-
-        var body: some View {
-            switch presentingComponent.presentationMode {
-            case .sheet:
-                content.sheet(isPresented: $presentingComponent.isPresenting, onDismiss: { [weak presentingComponent] in
-                    presentingComponent?.parent?.presentingComponent = nil
-                    let presentedEntity = presentingComponent?.presentedEntity
-                    Task {
-                        await presentedEntity?.destroyComponent()
-                    }
-                    presentingComponent?.presentedEntity = nil
-                }, content: { [weak presentingComponent] in
-                    presentingComponent?.presentedEntity?.getView()
-                })
-            case .fullscreen:
-                content.fullScreenCover(isPresented: $presentingComponent.isPresenting, onDismiss: { [weak presentingComponent] in
-                    presentingComponent?.parent?.presentingComponent = nil
-                    let presentedEntity = presentingComponent?.presentedEntity
-                    Task {
-                        await presentedEntity?.destroyComponent()
-                    }
-                    presentingComponent?.presentedEntity = nil
-                }, content: { [weak presentingComponent] in
-                    presentingComponent?.presentedEntity?.getView()
-                })
-            }
-
         }
     }
 
@@ -214,6 +179,38 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
         isPresenting = false
         presentedEntity = nil
     }
+
+    struct PresentingView<Content: View>: View {
+        @ObservedObject var presentingComponent: PresentingScreenCoordinatorComponent
+        var content: Content
+
+        var body: some View {
+            switch presentingComponent.presentationMode {
+            case .sheet:
+                content.sheet(isPresented: $presentingComponent.isPresenting, onDismiss: { [weak presentingComponent] in
+                    presentingComponent?.parent?.presentingComponent = nil
+                    let presentedEntity = presentingComponent?.presentedEntity
+                    Task {
+                        await presentedEntity?.destroyComponent()
+                    }
+                    presentingComponent?.presentedEntity = nil
+                }, content: { [weak presentingComponent] in
+                    presentingComponent?.presentedEntity?.getView()
+                })
+            case .fullscreen:
+                content.fullScreenCover(isPresented: $presentingComponent.isPresenting, onDismiss: { [weak presentingComponent] in
+                    presentingComponent?.parent?.presentingComponent = nil
+                    let presentedEntity = presentingComponent?.presentedEntity
+                    Task {
+                        await presentedEntity?.destroyComponent()
+                    }
+                    presentingComponent?.presentedEntity = nil
+                }, content: { [weak presentingComponent] in
+                    presentingComponent?.presentedEntity?.getView()
+                })
+            }
+        }
+    }
 }
 
 enum Event {
@@ -233,7 +230,7 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
     @Published var navigationPath: NavigationPath = NavigationPath()
     @Published var sequenceCoordinator: SequenceCoordinatorEntity?
 
-    private var wasInitialized: Bool = false
+    var wasInitialized: Bool = false
 
     public init() {}
 
@@ -262,6 +259,7 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
                                 let path = coordinator.navigationPath.getPathRepresentation()
                                 await coordinator.removeUnusedCoordinators(path: path)
                             }
+
                         }
                     }
                 }
@@ -290,10 +288,13 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
     }
 
     func updatePath() {
-        if wasInitialized {
-            let arrayOfId: [CoordinatorID] = NavigationTree.getIDTreeRecursive(from: NavigationTree.Node(self))
-            let withoutFirst = arrayOfId.dropFirst()
-            navigationPath = NavigationPath(withoutFirst)
+        Task { @MainActor in
+            if self.wasInitialized {
+                try? await Task.sleep(for: .milliseconds(1))
+                let arrayOfId: [CoordinatorID] = NavigationTree.getIDTreeRecursive(from: NavigationTree.Node(self))
+                let withoutFirst = arrayOfId.dropFirst()
+                self.navigationPath = NavigationPath(withoutFirst)
+            }
         }
     }
 
@@ -303,9 +304,7 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
         case .navigationPathUpdateNeeded:
             updatePath()
         case .removeCoordinatorsNeeded(let coordinatorsIDs):
-            if wasInitialized {
-                await removeCoordinators(iDs: coordinatorsIDs)
-            }
+            await removeCoordinators(iDs: coordinatorsIDs)
         }
     }
 
@@ -683,6 +682,27 @@ public struct NavigationTree {
     static func getFirstComponent(from: Node) -> Component? {
         let tree = getTreeRecursive(from: from)
         return tree.first?.component
+    }
+
+    static func getRootStackParent(from: Node) -> StackCoordinatorComponent? {
+        switch from {
+        case .stack(let stackCoordinatorComponent):
+            return stackCoordinatorComponent
+        case .sequence(let sequenceCoordinatorComponent):
+            if let parent = sequenceCoordinatorComponent.parent {
+                if let parentStack = parent.stack {
+                    return getRootStackParent(from: Node(parentStack))
+                } else if let parentSequence = parent.sequence {
+                    return getRootStackParent(from: Node(parentSequence))
+                } else {
+                    return nil
+                }
+            } else {
+                return nil
+            }
+        case .screen:
+            return nil
+        }
     }
 }
 
