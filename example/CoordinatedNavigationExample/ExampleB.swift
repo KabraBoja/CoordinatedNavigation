@@ -75,6 +75,11 @@ struct ExampleB { // Namespace
                     let presentedSequence3 = await DefaultSequenceCoordinator(screenCoordinator: presentingScreen3)
                     let presentedStack3 = await DefaultStackCoordinator(sequenceCoordinator: presentedSequence3)
                     await presentingScreen2.navigationComponent.getPresentingComponent().present(stack: presentedStack3, mode: .sheet)
+
+                    let presentingScreen4 = SimpleTitleScreenCoordinator(title: "Presenting Screen 4")
+                    let presentedSequence4 = await DefaultSequenceCoordinator(screenCoordinator: presentingScreen4)
+                    let presentedStack4 = await DefaultStackCoordinator(sequenceCoordinator: presentedSequence4)
+                    await presentedStack3.navigationComponent.getPresentingComponent().present(stack: presentedStack4, mode: .sheet)
                 }
             }
         }

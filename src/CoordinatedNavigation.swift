@@ -82,7 +82,8 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
         if let presentingComponent = presentingComponent {
             return presentingComponent
         } else {
-            let presentingComponent = PresentingScreenCoordinatorComponent(screen: self)
+            let presentingComponent = PresentingScreenCoordinatorComponent()
+            presentingComponent.setParent(screen: self)
             self.presentingComponent = presentingComponent
             return presentingComponent
         }
@@ -121,7 +122,20 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
 // Known Apple Memory leak bug: https://developer.apple.com/forums/thread/737967?answerId=767599022#767599022
 public class PresentingScreenCoordinatorComponent: ObservableObject {
 
-    weak var parent: ScreenCoordinatorComponent?
+    struct Parent {
+        weak var stack: StackCoordinatorComponent?
+        weak var screen: ScreenCoordinatorComponent?
+
+        init(stack: StackCoordinatorComponent?) {
+            self.stack = stack
+            self.screen = nil
+        }
+
+        init(screen: ScreenCoordinatorComponent?) {
+            self.stack = nil
+            self.screen = screen
+        }
+    }
 
     enum PresentedEntity {
         case screen(ScreenCoordinatorEntity)
@@ -155,9 +169,14 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
     @Published var isPresenting: Bool = false
     @Published var presentationMode: PresentationMode = .sheet
 
-    @MainActor
-    init(screen: ScreenCoordinatorComponent) {
-        parent = screen
+    var parent: Parent?
+
+    func setParent(screen: ScreenCoordinatorComponent) {
+        parent = Parent(screen: screen)
+    }
+
+    func setParent(stack: StackCoordinatorComponent) {
+        parent = Parent(stack: stack)
     }
 
     @MainActor
@@ -188,7 +207,7 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
             switch presentingComponent.presentationMode {
             case .sheet:
                 content.sheet(isPresented: $presentingComponent.isPresenting, onDismiss: { [weak presentingComponent] in
-                    presentingComponent?.parent?.presentingComponent = nil
+                    //presentingComponent?.parent?.presentingComponent = nil
                     let presentedEntity = presentingComponent?.presentedEntity
                     Task {
                         await presentedEntity?.destroyComponent()
@@ -199,7 +218,7 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
                 })
             case .fullscreen:
                 content.fullScreenCover(isPresented: $presentingComponent.isPresenting, onDismiss: { [weak presentingComponent] in
-                    presentingComponent?.parent?.presentingComponent = nil
+                    //presentingComponent?.parent?.presentingComponent = nil
                     let presentedEntity = presentingComponent?.presentedEntity
                     Task {
                         await presentedEntity?.destroyComponent()
@@ -229,13 +248,17 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
 
     @Published var navigationPath: NavigationPath = NavigationPath()
     @Published var sequenceCoordinator: SequenceCoordinatorEntity?
+    let presentingComponent: PresentingScreenCoordinatorComponent = PresentingScreenCoordinatorComponent()
 
     var wasInitialized: Bool = false
 
-    public init() {}
+    public init() {
+        self.presentingComponent.setParent(stack: self)
+    }
 
     public init(sequence: SequenceCoordinatorEntity) {
         self.sequenceCoordinator = sequence
+        self.presentingComponent.setParent(stack: self)
     }
 
     public func getView() -> AnyView {
@@ -251,24 +274,27 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
         }
 
         var body: some View {
-            NavigationStack(path: $coordinator.navigationPath) {
-                if coordinator.sequenceCoordinator != nil, let firstView = coordinator.getFirstCoordinatorView() {
-                    firstView.navigationDestination(for: UUID.self) { item in
-                        coordinator.getCoordinatorView(item).onDisappear {
-                            Task { @MainActor in
-                                let path = coordinator.navigationPath.getPathRepresentation()
-                                await coordinator.removeUnusedCoordinators(path: path)
-                            }
+            PresentingScreenCoordinatorComponent.PresentingView(
+                presentingComponent: coordinator.presentingComponent,
+                content: NavigationStack(path: $coordinator.navigationPath) {
+                    if coordinator.sequenceCoordinator != nil, let firstView = coordinator.getFirstCoordinatorView() {
+                        firstView.navigationDestination(for: UUID.self) { item in
+                            coordinator.getCoordinatorView(item).onDisappear {
+                                Task { @MainActor in
+                                    let path = coordinator.navigationPath.getPathRepresentation()
+                                    await coordinator.removeUnusedCoordinators(path: path)
+                                }
 
+                            }
                         }
                     }
+                }.task {
+                    if !coordinator.wasInitialized {
+                        coordinator.wasInitialized = true
+                        coordinator.updatePath()
+                    }
                 }
-            }.task {
-                if !coordinator.wasInitialized {
-                    coordinator.wasInitialized = true
-                    coordinator.updatePath()
-                }
-            }
+            )
         }
     }
 
@@ -345,6 +371,11 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
             return screenCoordinator.getView()
         }
         return nil
+    }
+
+    @MainActor
+    public func getPresentingComponent() async -> PresentingScreenCoordinatorComponent {
+        presentingComponent
     }
 
     @MainActor
