@@ -50,7 +50,6 @@ struct ExampleC { // Namespace
         }
     }
 
-
     class TestiOSBugStackInTabViewCoordinator: ObservableObject {
 
         @Published var navigationPath: NavigationPath
@@ -107,6 +106,53 @@ struct ExampleC { // Namespace
                 })
                 .tag(0)
             }
+        }
+    }
+
+    struct TestiOSBugStackInTabView: View {
+
+        @State var navigationPath: NavigationPath = NavigationPath()
+        @State var selectedTab: Int = 0
+
+        let viewsDict: [UUID: Text]
+
+        static let id0: UUID = UUID()
+        static let id1: UUID = UUID()
+        static let id2: UUID = UUID()
+
+        init() {
+            viewsDict = [
+                Self.id0: Text("Push 0"),
+                Self.id1: Text("Push 1"),
+                Self.id2: Text("Push 2")
+            ]
+        }
+
+        var body: some View {
+            TabView(selection: $selectedTab,
+                    content:  {
+                NavigationStack(path: $navigationPath, root: {
+                    Text("Root View").navigationDestination(for: UUID.self) { item in
+                        viewsDict[item]
+                        // Text("TEST")
+                    }
+                })
+                .task {
+                    print("Tab 1 appears")
+                    navigationPath.append(Self.id0)
+                    navigationPath.append(Self.id1)
+                    navigationPath.append(Self.id2)
+                }
+                .tabItem { Text("Tab 1") }
+                .tag(0)
+
+                Text("Second Tab")
+                    .task {
+                        print("Tab 2 appears")
+                    }
+                    .tabItem { Text("Tab 2") }
+                    .tag(1)
+            })
         }
     }
 }

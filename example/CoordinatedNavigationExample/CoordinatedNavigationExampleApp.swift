@@ -10,19 +10,24 @@ struct CoordinatedNavigationExampleApp: App {
         case exampleC
     }
 
-    let exampleCase: ExampleCase = .exampleC
+    let exampleCase: ExampleCase = .exampleB
 
     var body: some Scene {
         WindowGroup {
             AsyncViewCoordinator(loadingView: SplashScreen()) { () -> ViewEntity in
-                return switch exampleCase {
-                case .exampleA:
-                    await DefaultStackCoordinator(sequenceCoordinator: ExampleA.RootSequenceCoordinator())
-                case .exampleB:
-                    await DefaultStackCoordinator(sequenceCoordinator: ExampleB.RootSequenceCoordinator())
-                case .exampleC:
-                    await ExampleC.CustomTabBarCoordinator()
-                }
+                let result: ViewEntity = await Task {
+                    try? await Task.sleep(for: .seconds(1))
+
+                    return switch exampleCase {
+                    case .exampleA:
+                        await DefaultStackCoordinator(sequenceCoordinator: ExampleA.RootSequenceCoordinator())
+                    case .exampleB:
+                        await DefaultStackCoordinator(sequenceCoordinator: ExampleB.RootSequenceCoordinator())
+                    case .exampleC:
+                        DefaultScreenCoordinator(view: ExampleC.TestiOSBugStackInTabView())
+                    }
+                }.value
+                return result
             }.getView()
         }
     }

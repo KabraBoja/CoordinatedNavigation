@@ -61,6 +61,7 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
 
     @Published var view: AnyView?
     @Published var presentingComponent: PresentingScreenCoordinatorComponent?
+    @Published private var wasInitialized: Bool = false
 
     public init() {}
 
@@ -69,7 +70,7 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
     }
 
     public func getView() -> AnyView {
-        ContentView(screenComponent: self).toAnyView()
+        ContentView(coordinator: self).toAnyView()
     }
 
     public func setView(_ view: some View) {
@@ -88,18 +89,22 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
     }
 
     struct ContentView: View {
-        @ObservedObject var screenComponent: ScreenCoordinatorComponent
+        @ObservedObject var coordinator: ScreenCoordinatorComponent
 
         var body: some View {
-            if let presentingComponent = screenComponent.presentingComponent {
-                PresentingView(presentingComponent: presentingComponent, content: getView())
+            if coordinator.wasInitialized, let presentingComponent = coordinator.presentingComponent {
+                PresentingView(presentingComponent: presentingComponent, content: getView()).task {
+                    coordinator.wasInitialized = true
+                }
             } else {
-                getView()
+                getView().task {
+                    coordinator.wasInitialized = true
+                }
             }
         }
 
         func getView() -> AnyView {
-            if let view = screenComponent.view {
+            if let view = coordinator.view {
                 view
             } else {
                 EmptyView().toAnyView()
@@ -225,18 +230,15 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
 
     public let navigationId: CoordinatorID = CoordinatorID()
 
-    @Published var navigationPath: NavigationPath
+    @Published var navigationPath: NavigationPath = NavigationPath()
     @Published var sequenceCoordinator: SequenceCoordinatorEntity?
 
-    public init() {
-        self.navigationPath = NavigationPath()
-        updatePath()
-    }
+    private var wasInitialized: Bool = false
+
+    public init() {}
 
     public init(sequence: SequenceCoordinatorEntity) {
         self.sequenceCoordinator = sequence
-        self.navigationPath = NavigationPath()
-        updatePath()
     }
 
     public func getView() -> AnyView {
@@ -263,6 +265,11 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
                         }
                     }
                 }
+            }.task {
+                if !coordinator.wasInitialized {
+                    coordinator.wasInitialized = true
+                    coordinator.updatePath()
+                }
             }
         }
     }
@@ -283,9 +290,11 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
     }
 
     func updatePath() {
-        let arrayOfId: [CoordinatorID] = NavigationTree.getIDTreeRecursive(from: NavigationTree.Node(self))
-        let withoutFirst = arrayOfId.dropFirst()
-        navigationPath = NavigationPath(withoutFirst.map { $0 })
+        if wasInitialized {
+            let arrayOfId: [CoordinatorID] = NavigationTree.getIDTreeRecursive(from: NavigationTree.Node(self))
+            let withoutFirst = arrayOfId.dropFirst()
+            navigationPath = NavigationPath(withoutFirst)
+        }
     }
 
     @MainActor
@@ -294,7 +303,9 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
         case .navigationPathUpdateNeeded:
             updatePath()
         case .removeCoordinatorsNeeded(let coordinatorsIDs):
-            await removeCoordinators(iDs: coordinatorsIDs)
+            if wasInitialized {
+                await removeCoordinators(iDs: coordinatorsIDs)
+            }
         }
     }
 
