@@ -8,9 +8,10 @@ struct CoordinatedNavigationExampleApp: App {
         case exampleA
         case exampleB
         case exampleC
+        case exampleD
     }
 
-    let exampleCase: ExampleCase = .exampleB
+    let exampleCase: ExampleCase = .exampleD
 
     var body: some Scene {
         WindowGroup {
@@ -25,6 +26,10 @@ struct CoordinatedNavigationExampleApp: App {
                         await DefaultStackCoordinator(sequenceCoordinator: ExampleB.RootSequenceCoordinator())
                     case .exampleC:
                         await ExampleC.CustomTabBarCoordinator()
+                    case .exampleD:
+                        ExampleD.createACustomTutorialScreenCoordinator {
+                            print("Next pressed")
+                        }
                     }
                 }.value
                 return result
