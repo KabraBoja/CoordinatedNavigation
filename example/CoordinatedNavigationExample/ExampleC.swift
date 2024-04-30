@@ -10,6 +10,7 @@ struct ExampleC { // Namespace
         @Published var selectedTab: Int = 0
         @Published var firstTabCoordinator: ViewEntity
         @Published var secondTabCoordinator: ViewEntity
+        @Published var wasInitialized: Bool = false
 
         init() async {
             firstTabCoordinator = await DefaultStackCoordinator(sequenceCoordinator: FirstTabSequenceCoordinator())
@@ -23,9 +24,15 @@ struct ExampleC { // Namespace
 
             var body: some View {
                 TabView(selection: $coordinator.selectedTab, content:  {
-                    coordinator.firstTabCoordinator.getView().tabItem { Text("Tab 1") }.tag(0)
-                    coordinator.secondTabCoordinator.getView().tabItem { Text("Tab 2")  }.tag(1)
-                })
+                    if coordinator.wasInitialized {
+                        coordinator.firstTabCoordinator.getView().tabItem { Text("Tab 1") }.tag(0)
+                        coordinator.secondTabCoordinator.getView().tabItem { Text("Tab 2")  }.tag(1)
+                    }
+                }).task {
+                    if !coordinator.wasInitialized {
+                        coordinator.wasInitialized = true
+                    }
+                }
             }
         }
 

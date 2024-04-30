@@ -94,7 +94,7 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
 
         var body: some View {
             if coordinator.wasInitialized, let presentingComponent = coordinator.presentingComponent {
-                PresentingScreenCoordinatorComponent.PresentingView(presentingComponent: presentingComponent, content: getView())
+                PresentingScreenCoordinatorComponent.PresentingView(coordinator: presentingComponent, content: getView())
             } else {
                 getView().task {
                     coordinator.wasInitialized = true
@@ -166,8 +166,10 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
     }
 
     @Published var presentedEntity: PresentedEntity?
-    @Published var isPresenting: Bool = false
+    @Published private var isPresenting: Bool = false
+    private var initialIsPresenting: Bool = false
     @Published var presentationMode: PresentationMode = .sheet
+    var parentDidAppear: Bool = false
 
     var parent: Parent?
 
@@ -182,50 +184,83 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
     @MainActor
     public func present(screen: ScreenCoordinatorEntity, mode: PresentationMode) async {
         presentationMode = mode
-        isPresenting = true
+        if parentDidAppear {
+            isPresenting = true
+        } else {
+            initialIsPresenting = true
+        }
         presentedEntity = .screen(screen)
     }
 
     @MainActor
     public func present(stack: StackCoordinatorEntity, mode: PresentationMode) async {
         presentationMode = mode
-        isPresenting = true
+        if parentDidAppear {
+            isPresenting = true
+        } else {
+            initialIsPresenting = true
+        }
         presentedEntity = .stack(stack)
     }
 
     @MainActor
     public func dismiss() async {
-        isPresenting = false
+        if parentDidAppear {
+            isPresenting = false
+        } else {
+            initialIsPresenting = false
+        }
         presentedEntity = nil
     }
 
     struct PresentingView<Content: View>: View {
-        @ObservedObject var presentingComponent: PresentingScreenCoordinatorComponent
+        @ObservedObject var coordinator: PresentingScreenCoordinatorComponent
         var content: Content
 
         var body: some View {
-            switch presentingComponent.presentationMode {
+            createView()
+        }
+
+        @ViewBuilder
+        func createView() -> some View {
+            switch coordinator.presentationMode {
             case .sheet:
-                content.sheet(isPresented: $presentingComponent.isPresenting, onDismiss: { [weak presentingComponent] in
+                content.onAppear {
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .seconds(0.5)) // Ideally we should detect when the presentation animation has finished.
+                        if !coordinator.parentDidAppear {
+                            coordinator.parentDidAppear = true
+                            coordinator.isPresenting = coordinator.initialIsPresenting
+                        }
+                    }
+                }.sheet(isPresented: $coordinator.isPresenting, onDismiss: { [weak coordinator] in
                     //presentingComponent?.parent?.presentingComponent = nil
-                    let presentedEntity = presentingComponent?.presentedEntity
+                    let presentedEntity = coordinator?.presentedEntity
                     Task {
                         await presentedEntity?.destroyComponent()
                     }
-                    presentingComponent?.presentedEntity = nil
-                }, content: { [weak presentingComponent] in
-                    presentingComponent?.presentedEntity?.getView()
+                    coordinator?.presentedEntity = nil
+                }, content: { [weak coordinator] in
+                    coordinator?.presentedEntity?.getView()
                 })
             case .fullscreen:
-                content.fullScreenCover(isPresented: $presentingComponent.isPresenting, onDismiss: { [weak presentingComponent] in
+                content.onAppear {
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .seconds(0.5)) // Ideally we should detect when the presentation animation has finished.
+                        if !coordinator.parentDidAppear {
+                            coordinator.parentDidAppear = true
+                            coordinator.isPresenting = coordinator.initialIsPresenting
+                        }
+                    }
+                }.fullScreenCover(isPresented: $coordinator.isPresenting, onDismiss: { [weak coordinator] in
                     //presentingComponent?.parent?.presentingComponent = nil
-                    let presentedEntity = presentingComponent?.presentedEntity
+                    let presentedEntity = coordinator?.presentedEntity
                     Task {
                         await presentedEntity?.destroyComponent()
                     }
-                    presentingComponent?.presentedEntity = nil
-                }, content: { [weak presentingComponent] in
-                    presentingComponent?.presentedEntity?.getView()
+                    coordinator?.presentedEntity = nil
+                }, content: { [weak coordinator] in
+                    coordinator?.presentedEntity?.getView()
                 })
             }
         }
@@ -250,7 +285,10 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
     @Published var sequenceCoordinator: SequenceCoordinatorEntity?
     let presentingComponent: PresentingScreenCoordinatorComponent = PresentingScreenCoordinatorComponent()
 
-    var wasInitialized: Bool = false
+    private var wasInitialized: Bool = false
+    private var updatePathNeeded: Bool = false
+    private var lastOnDisappearPath: String = ""
+
 
     public init() {
         self.presentingComponent.setParent(stack: self)
@@ -275,23 +313,25 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
 
         var body: some View {
             PresentingScreenCoordinatorComponent.PresentingView(
-                presentingComponent: coordinator.presentingComponent,
+                coordinator: coordinator.presentingComponent,
                 content: NavigationStack(path: $coordinator.navigationPath) {
                     if coordinator.sequenceCoordinator != nil, let firstView = coordinator.getFirstCoordinatorView() {
                         firstView.navigationDestination(for: UUID.self) { item in
                             coordinator.getCoordinatorView(item).onDisappear {
                                 Task { @MainActor in
                                     let path = coordinator.navigationPath.getPathRepresentation()
-                                    await coordinator.removeUnusedCoordinators(path: path)
+                                    if path != coordinator.lastOnDisappearPath {
+                                        coordinator.lastOnDisappearPath = path
+                                        await coordinator.removeUnusedCoordinators(path: path)
+                                    }
                                 }
-
                             }
                         }
                     }
                 }.task {
                     if !coordinator.wasInitialized {
                         coordinator.wasInitialized = true
-                        coordinator.updatePath()
+                        coordinator.scheduleUpdatePath()
                     }
                 }
             )
@@ -303,23 +343,27 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
         await pop()
         sequence.navigationComponent.parent = SequenceCoordinatorComponent.Parent(stack: self)
         sequenceCoordinator = sequence
-        updatePath()
+        scheduleUpdatePath()
     }
 
     @MainActor
     public func pop() async {
         await sequenceCoordinator?.navigationComponent.destroyComponent()
         sequenceCoordinator = nil
-        updatePath()
+        scheduleUpdatePath()
     }
 
-    func updatePath() {
+    func scheduleUpdatePath() {
         Task { @MainActor in
+            updatePathNeeded = true
             if self.wasInitialized {
-                try? await Task.sleep(for: .milliseconds(1))
-                let arrayOfId: [CoordinatorID] = NavigationTree.getIDTreeRecursive(from: NavigationTree.Node(self))
-                let withoutFirst = arrayOfId.dropFirst()
-                self.navigationPath = NavigationPath(withoutFirst)
+                try? await Task.sleep(for: .milliseconds(1)) // We want to trigger the update with a dispatch async.
+                if updatePathNeeded {
+                    let arrayOfId: [CoordinatorID] = NavigationTree.getIDTreeRecursive(from: NavigationTree.Node(self))
+                    let withoutFirst = arrayOfId.dropFirst()
+                    self.navigationPath = NavigationPath(withoutFirst)
+                    updatePathNeeded = false
+                }
             }
         }
     }
@@ -328,7 +372,7 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
     func eventReceived(event: Event) async {
         switch event {
         case .navigationPathUpdateNeeded:
-            updatePath()
+            scheduleUpdatePath()
         case .removeCoordinatorsNeeded(let coordinatorsIDs):
             await removeCoordinators(iDs: coordinatorsIDs)
         }
@@ -450,6 +494,20 @@ public class SequenceCoordinatorComponent: ObservableObject, Component {
     }
 
     @MainActor
+    public func push(children: [ChildCoordinator]) async {
+        for child in children {
+            switch child {
+            case .screen(let screen):
+                childCoordinators.append(.screen(screen))
+            case .sequence(let sequence):
+                sequence.navigationComponent.parent = Parent(sequence: self)
+                childCoordinators.append(.sequence(sequence))
+            }
+        }
+        await sendEventToParent(event: .navigationPathUpdateNeeded)
+    }
+
+    @MainActor
     public func pop(count: Int = 1) async {
         let dropCount = childCoordinators.count - count
         guard dropCount > 0 else { return }
@@ -501,6 +559,22 @@ public class SequenceCoordinatorComponent: ObservableObject, Component {
         sequence.navigationComponent.parent = Parent(sequence: self)
         let removedCoordinatorIDs = childCoordinators.map { $0.getID() }
         childCoordinators.append(.sequence(sequence))
+        await sendEventToParent(event: .removeCoordinatorsNeeded(removedCoordinatorIDs))
+        await sendEventToParent(event: .navigationPathUpdateNeeded)
+    }
+
+    @MainActor
+    public func set(children: [ChildCoordinator]) async {
+        let removedCoordinatorIDs = childCoordinators.map { $0.getID() }
+        for child in children {
+            switch child {
+            case .screen(let screen):
+                childCoordinators.append(.screen(screen))
+            case .sequence(let sequence):
+                sequence.navigationComponent.parent = Parent(sequence: self)
+                childCoordinators.append(.sequence(sequence))
+            }
+        }
         await sendEventToParent(event: .removeCoordinatorsNeeded(removedCoordinatorIDs))
         await sendEventToParent(event: .navigationPathUpdateNeeded)
     }
@@ -701,6 +775,7 @@ public struct NavigationTree {
     }
 
     static func getIDTreeRecursive(from: Node) -> [CoordinatorID] {
+        print("getIDTreeRecursive")
         let tree = getTreeRecursive(from: from)
         return tree.map { $0.navigationId }
     }

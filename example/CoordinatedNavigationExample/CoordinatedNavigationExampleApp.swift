@@ -24,7 +24,7 @@ struct CoordinatedNavigationExampleApp: App {
                     case .exampleB:
                         await DefaultStackCoordinator(sequenceCoordinator: ExampleB.RootSequenceCoordinator())
                     case .exampleC:
-                        DefaultScreenCoordinator(view: ExampleC.TestiOSBugStackInTabView())
+                        await ExampleC.CustomTabBarCoordinator()
                     }
                 }.value
                 return result
