@@ -59,5 +59,4 @@ struct ExampleD {
         let viewModel = CustomTutorialViewModel(title: "Custom Tutorial View", nextTitle: "Next", onNextPressed: onNextPressed)
         return DefaultScreenCoordinator(view: CustomTutorialView(viewModel: viewModel))
     }
-
 }
