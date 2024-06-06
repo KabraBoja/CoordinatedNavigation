@@ -4,6 +4,8 @@ import SwiftUI
 // Known Apple Memory leak bug: https://developer.apple.com/forums/thread/737967?answerId=767599022#767599022
 public class PresentingScreenCoordinatorComponent: ObservableObject {
 
+    public static let presentationWaitingTime: Double = 0.5
+
     struct Parent {
         weak var stack: StackCoordinatorComponent?
         weak var screen: ScreenCoordinatorComponent?
@@ -109,7 +111,7 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
             case .sheet:
                 content.onAppear {
                     Task { @MainActor in
-                        try? await Task.sleep(for: .seconds(0.5)) // Ideally we should detect when the presentation animation has finished.
+                        try? await Task.sleep(for: .seconds(PresentingScreenCoordinatorComponent.presentationWaitingTime)) // Ideally we should detect when the presentation animation has finished.
                         if !coordinator.parentDidAppear {
                             coordinator.parentDidAppear = true
                             coordinator.isPresenting = coordinator.initialIsPresenting
@@ -128,7 +130,7 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
             case .fullscreen:
                 content.onAppear {
                     Task { @MainActor in
-                        try? await Task.sleep(for: .seconds(0.5)) // Ideally we should detect when the presentation animation has finished.
+                        try? await Task.sleep(for: .seconds(PresentingScreenCoordinatorComponent.presentationWaitingTime)) // Ideally we should detect when the presentation animation has finished.
                         if !coordinator.parentDidAppear {
                             coordinator.parentDidAppear = true
                             coordinator.isPresenting = coordinator.initialIsPresenting

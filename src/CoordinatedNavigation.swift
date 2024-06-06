@@ -70,4 +70,8 @@ public extension View {
     func toAnyView() -> AnyView {
         AnyView(self)
     }
+
+    func toScreenCoordinator() -> ScreenCoordinatorEntity {
+        DefaultScreenCoordinator(view: self)
+    }
 }

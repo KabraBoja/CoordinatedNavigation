@@ -61,21 +61,21 @@ struct ExampleB { // Namespace
                     let presentingScreen0 = SimpleTitleScreenCoordinator(title: "Presenting Screen 0")
                     await navigationComponent.push(screen: presentingScreen0)
 
+                    // Present a simple screen from an stack
                     let presentingScreen1 = SimpleTitleScreenCoordinator(title: "Presenting Screen 1")
-                    let presentedSequence1 = await DefaultSequenceCoordinator(screenCoordinator: presentingScreen1)
-                    let presentedStack1 = await DefaultStackCoordinator(sequenceCoordinator: presentedSequence1)
-                    await presentingScreen0.navigationComponent.getPresentingComponent().present(stack: presentedStack1, mode: .sheet)
+                    await presentingScreen0.navigationComponent.getPresentingComponent().present(screen: presentingScreen1, mode: .sheet)
 
+                    // Present a simple screen from a screen
                     let presentingScreen2 = SimpleTitleScreenCoordinator(title: "Presenting Screen 2")
-                    let presentedSequence2 = await DefaultSequenceCoordinator(screenCoordinator: presentingScreen2)
-                    let presentedStack2 = await DefaultStackCoordinator(sequenceCoordinator: presentedSequence2)
-                    await presentingScreen1.navigationComponent.getPresentingComponent().present(stack: presentedStack2, mode: .sheet)
+                    await presentingScreen1.navigationComponent.getPresentingComponent().present(screen: presentingScreen2, mode: .sheet)
 
+                    // Present an stack from a screen
                     let presentingScreen3 = SimpleTitleScreenCoordinator(title: "Presenting Screen 3")
                     let presentedSequence3 = await DefaultSequenceCoordinator(screenCoordinator: presentingScreen3)
                     let presentedStack3 = await DefaultStackCoordinator(sequenceCoordinator: presentedSequence3)
                     await presentingScreen2.navigationComponent.getPresentingComponent().present(stack: presentedStack3, mode: .sheet)
 
+                    // Present an stack from an stack
                     let presentingScreen4 = SimpleTitleScreenCoordinator(title: "Presenting Screen 4")
                     let presentedSequence4 = await DefaultSequenceCoordinator(screenCoordinator: presentingScreen4)
                     let presentedStack4 = await DefaultStackCoordinator(sequenceCoordinator: presentedSequence4)

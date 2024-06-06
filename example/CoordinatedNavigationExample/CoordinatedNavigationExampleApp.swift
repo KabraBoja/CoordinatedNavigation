@@ -11,7 +11,7 @@ struct CoordinatedNavigationExampleApp: App {
         case exampleD
     }
 
-    let exampleCase: ExampleCase = .exampleD
+    let exampleCase: ExampleCase = .exampleB
 
     var body: some Scene {
         WindowGroup {

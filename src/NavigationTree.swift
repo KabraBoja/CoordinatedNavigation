@@ -65,7 +65,6 @@ public struct NavigationTree {
     }
 
     static func getIDTreeRecursive(from: Node) -> [CoordinatorID] {
-        print("getIDTreeRecursive")
         let tree = getTreeRecursive(from: from)
         return tree.map { $0.navigationId }
     }
