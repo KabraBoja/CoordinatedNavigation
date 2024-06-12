@@ -67,11 +67,11 @@ public extension NavigationPath {
 }
 
 public extension View {
-    func toAnyView() -> AnyView {
+    public func toAnyView() -> AnyView {
         AnyView(self)
     }
 
-    func toScreenCoordinator() -> ScreenCoordinatorEntity {
+    public func toScreenCoordinator() -> ScreenCoordinatorEntity {
         DefaultScreenCoordinator(view: self)
     }
 }

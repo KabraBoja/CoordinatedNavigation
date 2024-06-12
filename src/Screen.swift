@@ -67,10 +67,23 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
 
 public class DefaultScreenCoordinator: ScreenCoordinatorEntity {
     public let navigationComponent: ScreenCoordinatorComponent = ScreenCoordinatorComponent()
+    public let storage: Any? // Use this property to hold a presenter or any other instance owned by the coordinator
 
-    public init() {}
+    public init() {
+        self.storage = nil
+    }
 
     public init(view: some View) {
         navigationComponent.setView(view)
+        self.storage = nil
+    }
+
+    public init(storage: Any) {
+        self.storage = storage
+    }
+
+    public init(view: some View, storage: Any) {
+        navigationComponent.setView(view)
+        self.storage = storage
     }
 }
