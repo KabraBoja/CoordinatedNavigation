@@ -1,6 +1,6 @@
 import Foundation
 
-public struct NavigationTree {
+public struct NavigationStackTree {
     public enum Node {
         case stack(StackCoordinatorComponent)
         case sequence(SequenceCoordinatorComponent)

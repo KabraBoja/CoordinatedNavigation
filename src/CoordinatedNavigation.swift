@@ -5,13 +5,25 @@ public typealias CoordinatorID = UUID
 
 public protocol Component {
     var navigationId: CoordinatorID { get }
+
+    /// Component name
+    var tag: String { get set }
+
+    /// Current children entities shown in the hierarchy
+    var children: [Entity] { get }
 }
 
 public protocol ViewComponent: Component {
     func getView() -> AnyView
 }
 
-public protocol ViewEntity {
+public protocol Entity {
+    var navigationId: CoordinatorID { get }
+}
+
+public protocol SequenceableEntity: Entity {}
+
+public protocol ViewEntity: Entity {
     func getView() -> AnyView
 }
 
@@ -27,8 +39,6 @@ public protocol ScreenCoordinatorEntity: AnyObject, ViewEntity, SequenceableEnti
     var navigationComponent: ScreenCoordinatorComponent { get }
 }
 
-public protocol SequenceableEntity {}
-
 public extension StackCoordinatorEntity {
     var navigationId: CoordinatorID {
         navigationComponent.navigationId
@@ -37,11 +47,29 @@ public extension StackCoordinatorEntity {
     func getView() -> AnyView {
         navigationComponent.getView()
     }
+
+    var tag: String {
+        get {
+            navigationComponent.tag
+        }
+        set {
+            navigationComponent.tag = newValue
+        }
+    }
 }
 
 public extension SequenceCoordinatorEntity {
     var navigationId: CoordinatorID {
         navigationComponent.navigationId
+    }
+
+    var tag: String {
+        get {
+            navigationComponent.tag
+        }
+        set {
+            navigationComponent.tag = newValue
+        }
     }
 }
 
@@ -52,6 +80,15 @@ public extension ScreenCoordinatorEntity {
 
     func getView() -> AnyView {
         navigationComponent.getView()
+    }
+
+    var tag: String {
+        get {
+            navigationComponent.tag
+        }
+        set {
+            navigationComponent.tag = newValue
+        }
     }
 }
 

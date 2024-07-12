@@ -3,18 +3,25 @@ import SwiftUI
 
 public class SequenceCoordinatorComponent: ObservableObject, Component {
 
-    public let navigationId: CoordinatorID = CoordinatorID()
-
     public enum ChildCoordinator {
         case sequence(SequenceCoordinatorEntity)
         case screen(ScreenCoordinatorEntity)
 
         public func getID() -> CoordinatorID {
-            return switch self {
+            switch self {
             case .sequence(let entity):
                 entity.navigationId
             case .screen(let entity):
                 entity.navigationId
+            }
+        }
+
+        public func getEntity() -> Entity {
+            switch self {
+            case .sequence(let entity):
+                entity
+            case .screen(let entity):
+                entity
             }
         }
     }
@@ -34,8 +41,16 @@ public class SequenceCoordinatorComponent: ObservableObject, Component {
         }
     }
 
+    public let navigationId: CoordinatorID = CoordinatorID()
+    public var tag: String = "SEQUENCE"
     var parent: Parent?
     var childCoordinators: [ChildCoordinator] = []
+    
+    public var children: [any Entity] {
+        childCoordinators.map { child in
+            child.getEntity()
+        }
+    }
 
     public init() {
         self.childCoordinators = []
@@ -156,11 +171,11 @@ public class SequenceCoordinatorComponent: ObservableObject, Component {
         childCoordinators.count
     }
 
-    public func childrenIDs() -> [CoordinatorID] {
+    public func getChildrenIDs() -> [CoordinatorID] {
         childCoordinators.map { $0.getID() }
     }
 
-    public func children() -> [ChildCoordinator] {
+    public func getChildren() -> [ChildCoordinator] {
         childCoordinators
     }
 

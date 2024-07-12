@@ -2,8 +2,15 @@ import Foundation
 import SwiftUI
 
 public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
-
     public let navigationId: CoordinatorID = CoordinatorID()
+    public var tag: String = "SCREEN"
+    public var children: [any Entity] {
+        if let presentingComponent = presentingComponent, let presentedEntity = presentingComponent.presentedEntity {
+            return [presentedEntity.getEntity()]
+        } else {
+            return []
+        }
+    }
 
     @Published var view: AnyView?
     @Published var presentingComponent: PresentingScreenCoordinatorComponent?

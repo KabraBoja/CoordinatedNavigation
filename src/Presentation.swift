@@ -4,7 +4,7 @@ import SwiftUI
 // Known Apple Memory leak bug: https://developer.apple.com/forums/thread/737967?answerId=767599022#767599022
 public class PresentingScreenCoordinatorComponent: ObservableObject {
 
-    public static let presentationWaitingTime: Double = 0.5
+    public static var presentationWaitingTime: Double = 0.5
 
     struct Parent {
         weak var stack: StackCoordinatorComponent?
@@ -34,6 +34,15 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
             }
         }
 
+        func getEntity() -> ViewEntity {
+            switch self {
+            case .screen(let screen):
+                screen
+            case .stack(let stack):
+                stack
+            }
+        }
+
         func destroyComponent() async {
             switch self {
             case .screen(let screen):
@@ -49,13 +58,13 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
         case fullscreen
     }
 
+    public var onUpdate: (Bool) -> Void = { _ in }
     @Published var presentedEntity: PresentedEntity?
     @Published private var isPresenting: Bool = false
-    private var initialIsPresenting: Bool = false
     @Published var presentationMode: PresentationMode = .sheet
     var parentDidAppear: Bool = false
-
     var parent: Parent?
+    private var initialIsPresenting: Bool = false
 
     func setParent(screen: ScreenCoordinatorComponent) {
         parent = Parent(screen: screen)
@@ -70,6 +79,7 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
         presentationMode = mode
         if parentDidAppear {
             isPresenting = true
+            onUpdate(isPresenting)
         } else {
             initialIsPresenting = true
         }
@@ -81,6 +91,7 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
         presentationMode = mode
         if parentDidAppear {
             isPresenting = true
+            onUpdate(isPresenting)
         } else {
             initialIsPresenting = true
         }
@@ -91,6 +102,7 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
     public func dismiss() async {
         if parentDidAppear {
             isPresenting = false
+            onUpdate(isPresenting)
         } else {
             initialIsPresenting = false
         }
@@ -115,6 +127,7 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
                         if !coordinator.parentDidAppear {
                             coordinator.parentDidAppear = true
                             coordinator.isPresenting = coordinator.initialIsPresenting
+                            coordinator.onUpdate(coordinator.isPresenting)
                         }
                     }
                 }.sheet(isPresented: $coordinator.isPresenting, onDismiss: { [weak coordinator] in
@@ -134,6 +147,7 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
                         if !coordinator.parentDidAppear {
                             coordinator.parentDidAppear = true
                             coordinator.isPresenting = coordinator.initialIsPresenting
+                            coordinator.onUpdate(coordinator.isPresenting)
                         }
                     }
                 }.fullScreenCover(isPresented: $coordinator.isPresenting, onDismiss: { [weak coordinator] in

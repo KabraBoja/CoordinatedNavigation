@@ -15,6 +15,7 @@ struct ExampleB { // Namespace
         }
 
         init() async {
+            tag = "RootSequenceCoordinator"
             let splashScreenCoordinator = CustomScreenCoordinator(title: "Splash Screen", actions: [], isBackAllowed: false)
             splashScreenCoordinator.actions = [
                 CustomScreenCoordinator.Action(id: "Deeplink: Simple Post", closure: { [weak self] in
@@ -47,6 +48,7 @@ struct ExampleB { // Namespace
                     await navigationComponent.push(sequence: AuthenticationSequenceCoordinator())
                     await navigationComponent.push(sequence: FeedSequenceCoordinator())
                     await navigationComponent.push(screen: SimpleTitleScreenCoordinator(title: "Recommended Post"))
+
                 case .presentLogin:
                     let simpleScreen = SimpleTitleScreenCoordinator(title: "Step 3 Presents")
                     await navigationComponent.push(screens: [
@@ -81,6 +83,10 @@ struct ExampleB { // Namespace
                     let presentedStack4 = await DefaultStackCoordinator(sequenceCoordinator: presentedSequence4)
                     await presentedStack3.navigationComponent.getPresentingComponent().present(stack: presentedStack4, mode: .sheet)
                 }
+
+                try? await Task.sleep(for: .seconds(3))
+                let tree = Tree.getTreeRecursive(from: Tree.Node(self))
+                print(tree.map { $0.component.tag })
             }
         }
     }
@@ -89,6 +95,7 @@ struct ExampleB { // Namespace
         let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
 
         init() async {
+            tag = "OnboardingSequenceCoordinator"
             await navigationComponent.set(screens: [
                 SimpleTitleScreenCoordinator(title: "Onboarding 1"),
                 SimpleTitleScreenCoordinator(title: "Onboarding 2"),
@@ -101,6 +108,7 @@ struct ExampleB { // Namespace
         var navigationComponent: StackCoordinatorComponent = StackCoordinatorComponent()
 
         init() async {
+            tag = "AuthenticationStackCoordinator"
             await navigationComponent.set(sequence: AuthenticationSequenceCoordinator())
         }
     }
@@ -109,6 +117,7 @@ struct ExampleB { // Namespace
         let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
 
         init() async {
+            tag = "AuthenticationSequenceCoordinator"
             await navigationComponent.set(screens: [
                 SimpleTitleScreenCoordinator(title: "BenefitsOfLogin"),
                 SimpleTitleScreenCoordinator(title: "Login"),
@@ -120,6 +129,7 @@ struct ExampleB { // Namespace
         let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
 
         init() async {
+            tag = "FeedSequenceCoordinator"
             await navigationComponent.set(screens: [
                 SimpleTitleScreenCoordinator(title: "Feed"),
                 SimpleTitleScreenCoordinator(title: "Post"),

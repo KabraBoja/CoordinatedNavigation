@@ -13,16 +13,25 @@ enum PathRepresentation {
 
 public class StackCoordinatorComponent: ObservableObject, ViewComponent {
 
-    public let navigationId: CoordinatorID = CoordinatorID()
-
     @Published var navigationPath: NavigationPath = NavigationPath()
     @Published var sequenceCoordinator: SequenceCoordinatorEntity?
+    public let navigationId: CoordinatorID = CoordinatorID()
     let presentingComponent: PresentingScreenCoordinatorComponent = PresentingScreenCoordinatorComponent()
+    public var tag: String = "STACK"
+    public var children: [any Entity] {
+        var entities: [Entity] = []
+        if let presentedEntity = presentingComponent.presentedEntity {
+            entities.append(presentedEntity.getEntity())
+        }
+        if let sequenceCoordinator = sequenceCoordinator {
+            entities.append(sequenceCoordinator)
+        }
+        return entities
+    }
 
     private var wasInitialized: Bool = false
     private var updatePathNeeded: Bool = false
     private var lastOnDisappearPath: String = ""
-
 
     public init() {
         self.presentingComponent.setParent(stack: self)
@@ -93,7 +102,7 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
             if self.wasInitialized {
                 try? await Task.sleep(for: .milliseconds(1)) // We want to trigger the update with a dispatch async.
                 if updatePathNeeded {
-                    let arrayOfId: [CoordinatorID] = NavigationTree.getIDTreeRecursive(from: NavigationTree.Node(self))
+                    let arrayOfId: [CoordinatorID] = NavigationStackTree.getIDTreeRecursive(from: NavigationStackTree.Node(self))
                     let withoutFirst = arrayOfId.dropFirst()
                     self.navigationPath = NavigationPath(withoutFirst)
                     updatePathNeeded = false
@@ -125,7 +134,7 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
         guard let sequenceCoordinator = sequenceCoordinator else { return }
 
         var pathAddingFirst: String = path
-        if let firstId = NavigationTree.getFirstComponent(from: NavigationTree.Node(self))?.navigationId {
+        if let firstId = NavigationStackTree.getFirstComponent(from: NavigationStackTree.Node(self))?.navigationId {
             pathAddingFirst.append(firstId.uuidString)
         }
 
@@ -136,7 +145,7 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
     }
 
     private func getCoordinatorView(_ id: UUID) -> AnyView? {
-        if let coordinator = NavigationTree.getComponent(from: NavigationTree.Node(self), navigationId: id),
+        if let coordinator = NavigationStackTree.getComponent(from: NavigationStackTree.Node(self), navigationId: id),
            let screenCoordinator = coordinator as? ScreenCoordinatorComponent {
             return screenCoordinator.getView()
         }
@@ -144,7 +153,7 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
     }
 
     private func getFirstCoordinatorView() -> AnyView? {
-        if let coordinator = NavigationTree.getFirstComponent(from: NavigationTree.Node(self)),
+        if let coordinator = NavigationStackTree.getFirstComponent(from: NavigationStackTree.Node(self)),
            let screenCoordinator = coordinator as? ScreenCoordinatorComponent {
             return screenCoordinator.getView()
         }

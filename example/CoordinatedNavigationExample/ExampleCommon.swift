@@ -13,6 +13,7 @@ class SimpleTitleScreenCoordinator: ScreenCoordinatorEntity {
 
     init(title: String) {
         navigationComponent.setView(SimpleView(title: title))
+        tag = title
     }
 
     struct SimpleView: View {
@@ -49,7 +50,6 @@ class CustomScreenCoordinator: ScreenCoordinatorEntity, ObservableObject {
     }
 
     init(title: String, actions: [Action], isBackAllowed: Bool) {
-
         if !DebugPrinter.printerAttached {
             DebugPrinter.printerAttached = true
             Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
@@ -60,6 +60,7 @@ class CustomScreenCoordinator: ScreenCoordinatorEntity, ObservableObject {
         self.actions = actions
         self.title = title
         self.isBackAllowed = isBackAllowed
+        tag = title
         navigationComponent.setView(ActionsView(coordinator: self))
     }
 
