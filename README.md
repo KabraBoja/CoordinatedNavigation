@@ -64,9 +64,9 @@ Why use a coordinator for a simple screen (view)?
 
 - [x] Upload an example project.
 - [x] Does it makes sense to have a RootView in the Stack? Maybe use an Screen coordinator directly.
-- [X] Modal Presentation could also happen from the Stack coordinator.
-- [X] Tree structure representation, supporting custom Screen Coordinators.
+- [x] Modal Presentation could also happen from the Stack coordinator.
+- [x] Tree structure representation, supporting custom Screen Coordinators.
+- [x] Rename Entities to Coordinators.
 - [ ] Add a proper how to use README section.
-- [ ] Rename Entities to Coordinators.
 - [ ] Try to use any View instead of AnyView.
 - [ ] Explore if I can merge the Stack with the Sequence.
