@@ -45,10 +45,10 @@ public class SequenceCoordinatorComponent: ObservableObject, Component {
     public var tag: String = "SEQUENCE"
     var parent: Parent?
     var childCoordinators: [ChildCoordinator] = []
-    
-    public var children: [any Entity] {
+
+    public func currentRoutes() -> [Route] {
         childCoordinators.map { child in
-            child.getEntity()
+            Route(entity: child.getEntity(), transition: .push)
         }
     }
 

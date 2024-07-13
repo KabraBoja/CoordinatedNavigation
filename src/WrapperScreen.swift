@@ -3,7 +3,6 @@ import SwiftUI
 
 public class WrapperScreenCoordinator: ScreenCoordinatorEntity {
     public let navigationComponent = ScreenCoordinatorComponent()
-    var currentViewEntity: ViewEntity?
 
     public init() async {}
 
@@ -13,17 +12,17 @@ public class WrapperScreenCoordinator: ScreenCoordinatorEntity {
 
     @MainActor
     public func setViewEntity(_ viewEntity: ViewEntity) async {
-        currentViewEntity = viewEntity
+        navigationComponent.childrenEntities.append(viewEntity)
         navigationComponent.setView(viewEntity.getView())
     }
 
     @MainActor
     public func setPlainView(_ view: some View) async {
-        currentViewEntity = nil
+        navigationComponent.childrenEntities.removeAll()
         navigationComponent.setView(view)
     }
 
     public func getCurrentViewEntity() -> ViewEntity? {
-        currentViewEntity
+        navigationComponent.childrenEntities.first
     }
 }

@@ -1,70 +1,48 @@
 import Foundation
 
 public struct Tree {
-    public enum Node {
-        case stack(StackCoordinatorEntity)
-        case sequence(SequenceCoordinatorEntity)
-        case screen(ScreenCoordinatorEntity)
-
-        public init(_ entity: Entity) {
-            if let stackCoordinator = entity as? StackCoordinatorEntity {
-                self = .stack(stackCoordinator)
-            } else if let sequenceCoordinator = entity as? SequenceCoordinatorEntity {
-                self = .sequence(sequenceCoordinator)
-            } else if let screenCoordinator = entity as? ScreenCoordinatorEntity {
-                self = .screen(screenCoordinator)
-            } else {
-                fatalError("Unknown Coordinator Entity Node")
-            }
-        }
-
-        public var component: Component {
-            switch self {
-            case .stack(let entity):
-                entity.navigationComponent
-            case .sequence(let entity):
-                entity.navigationComponent
-            case .screen(let entity):
-                entity.navigationComponent
-            }
-        }
-
-        public var entity: Entity {
-            switch self {
-            case .stack(let entity):
-                entity
-            case .sequence(let entity):
-                entity
-            case .screen(let entity):
-                entity
-            }
-        }
-
-        public var navigationId: CoordinatorID {
-            component.navigationId
-        }
-
-        public var children: [Entity] {
-            self.component.children
-        }
-    }
-
-    public static func getTreeRecursive(from: Node) -> [Node] {
-        var tree: [Node] = []
-        tree.append(Node(from.entity))
-        for child in from.children {
-            tree.append(contentsOf: getTreeRecursive(from: Node(child)))
+    public static func getTreeRecursive(from: Entity) -> [Route] {
+        var tree: [Route] = []
+        tree.append(Route(entity: from, transition: Route.Transition.root))
+        for route in from.component.currentRoutes() {
+            tree.append(contentsOf: getTreeRecursive(from: route))
         }
         return tree
     }
 
-    public static func getEntity(from: Node, navigationId: CoordinatorID) -> Entity? {
+    public static func findRoute(from: Entity, navigationId: CoordinatorID) -> Route? {
         let tree = getTreeRecursive(from: from)
-        return tree.first { $0.navigationId == navigationId }?.entity
+        return tree.first { $0.entity.navigationId == navigationId }
     }
 
-    public static func getEntity(from: Node, tag: String) -> Entity? {
+    public static func findRoute(from: Entity, tag: String) -> Route? {
         let tree = getTreeRecursive(from: from)
-        return tree.first { $0.component.tag == tag }?.entity
+        return tree.first { $0.entity.component.tag == tag }
+    }
+
+    public static func findAllRoutes(from: Entity, tag: String) -> [Route] {
+        let tree = getTreeRecursive(from: from)
+        return tree.filter { $0.entity.component.tag == tag }
+    }
+
+    public static func findEntity(from: Entity, navigationId: CoordinatorID) -> Entity? {
+        findRoute(from: from, navigationId: navigationId)?.entity
+    }
+
+    public static func findEntity(from: Entity, tag: String) -> Entity? {
+        findRoute(from: from, tag: tag)?.entity
+    }
+
+    public static func findAllEntity(from: Entity, tag: String) -> [Entity] {
+        findAllRoutes(from: from, tag: tag).map{ $0.entity }
+    }
+
+    static func getTreeRecursive(from: Route) -> [Route] {
+        var tree: [Route] = []
+        tree.append(from)
+        for route in from.entity.component.currentRoutes() {
+            tree.append(contentsOf: getTreeRecursive(from: route))
+        }
+        return tree
     }
 }

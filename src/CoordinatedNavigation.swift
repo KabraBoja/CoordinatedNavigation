@@ -3,14 +3,41 @@ import SwiftUI
 
 public typealias CoordinatorID = UUID
 
+public struct Route {
+    public let entity: Entity
+    public let transition: Transition
+
+    public enum Transition {
+        case root
+        case stackRoot
+        case push
+        case sheet
+        case fullscreen
+        case subview
+        case custom(String)
+
+        public var name: String {
+            switch self {
+            case .root: "ROOT"
+            case .stackRoot: "STACK_ROOT"
+            case .push: "PUSH"
+            case .sheet: "SHEET"
+            case .fullscreen: "FULLSCREEN"
+            case .subview: "SUBVIEW"
+            case .custom(let string): string
+            }
+        }
+    }
+}
+
 public protocol Component {
     var navigationId: CoordinatorID { get }
 
     /// Component name
     var tag: String { get set }
 
-    /// Current children entities shown in the hierarchy
-    var children: [Entity] { get }
+    /// Current routes shown in the hierarchy
+    func currentRoutes() -> [Route]
 }
 
 public protocol ViewComponent: Component {
@@ -19,6 +46,7 @@ public protocol ViewComponent: Component {
 
 public protocol Entity {
     var navigationId: CoordinatorID { get }
+    var component: Component { get }
 }
 
 public protocol SequenceableEntity: Entity {}
@@ -88,6 +116,20 @@ public extension ScreenCoordinatorEntity {
         }
         set {
             navigationComponent.tag = newValue
+        }
+    }
+}
+
+public extension Entity {
+    var component: Component {
+        if let stackCoordinator = self as? StackCoordinatorEntity {
+            return stackCoordinator.navigationComponent
+        } else if let sequenceCoordinator = self as? SequenceCoordinatorEntity {
+            return sequenceCoordinator.navigationComponent
+        } else if let screenCoordinator = self as? ScreenCoordinatorEntity {
+            return screenCoordinator.navigationComponent
+        } else {
+            fatalError("Unknown Coordinator Entity Node")
         }
     }
 }

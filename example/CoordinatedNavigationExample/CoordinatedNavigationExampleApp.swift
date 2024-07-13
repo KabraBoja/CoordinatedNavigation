@@ -32,6 +32,13 @@ struct CoordinatedNavigationExampleApp: App {
                         }
                     }
                 }.value
+
+                // Timer for debugging purposes: Prints the current tree every 2 seconds.
+                Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
+                    let tree = Tree.getTreeRecursive(from: result)
+                    print(tree.map { "\($0.transition.name) \($0.entity.component.tag)" })
+                }
+
                 return result
             }.getView()
         }

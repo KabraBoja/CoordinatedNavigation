@@ -29,9 +29,7 @@ The Tree Structure forces the coordinators to always be responsible of their **o
 A Stack Coordinator coordinates a navigation stack. It's used as the entry point of the app or a modal presentation.
 
 - Contains a NavigationStack view (Tree structure root).
-- Transitions between a root View and a Sequence.
 - Can only set/pop a Sequence.
-
 
 Example: The root view could be an splash screen. As soon as the app loads some needed stuff, the Stack Coordinator sets the first Sequence Coordinator.
 
@@ -60,13 +58,15 @@ Why use a coordinator for a simple screen (view)?
 
 - We avoid the view knowing about Domain scope.
 - The coordinator could be in charge of holding a reference to a Presenter or a ViewModel. Or even be used as the ObservableObject.
-- Serves as a good abstraction when working with modules/service locators.
+- Serves as a good abstraction when working with modules/service locators. Clients will know about the existance of a ScreenCoordinator only, but not which view/presentation classes are being used.
 
 ## Next Steps?
 
 - [x] Upload an example project.
 - [x] Does it makes sense to have a RootView in the Stack? Maybe use an Screen coordinator directly.
+- [X] Modal Presentation could also happen from the Stack coordinator.
+- [X] Tree structure representation, supporting custom Screen Coordinators.
+- [ ] Add a proper how to use README section.
+- [ ] Rename Entities to Coordinators.
 - [ ] Try to use any View instead of AnyView.
-- [ ] Add routes and builder pattern (typed navigation).
-- [ ] Modal Presentation could also happen from the Stack coordinator.
 - [ ] Explore if I can merge the Stack with the Sequence.

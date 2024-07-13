@@ -18,16 +18,6 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
     public let navigationId: CoordinatorID = CoordinatorID()
     let presentingComponent: PresentingScreenCoordinatorComponent = PresentingScreenCoordinatorComponent()
     public var tag: String = "STACK"
-    public var children: [any Entity] {
-        var entities: [Entity] = []
-        if let presentedEntity = presentingComponent.presentedEntity {
-            entities.append(presentedEntity.getEntity())
-        }
-        if let sequenceCoordinator = sequenceCoordinator {
-            entities.append(sequenceCoordinator)
-        }
-        return entities
-    }
 
     private var wasInitialized: Bool = false
     private var updatePathNeeded: Bool = false
@@ -168,6 +158,21 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
     @MainActor
     func destroyComponent() async {
         await pop()
+    }
+
+    public func currentRoutes() -> [Route] {
+        var routes: [Route] = []
+        if let presentedEntity = presentingComponent.presentedEntity {
+            let transition = switch presentingComponent.presentationMode {
+            case .fullscreen: Route.Transition.fullscreen
+            case .sheet: Route.Transition.sheet
+            }
+            routes.append(Route(entity: presentedEntity.getEntity(), transition: transition))
+        }
+        if let sequenceCoordinator = sequenceCoordinator {
+            routes.append(Route(entity: sequenceCoordinator, transition: .stackRoot))
+        }
+        return routes
     }
 }
 

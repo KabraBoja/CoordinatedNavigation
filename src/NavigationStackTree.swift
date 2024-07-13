@@ -1,12 +1,12 @@
 import Foundation
 
-public struct NavigationStackTree {
-    public enum Node {
+struct NavigationStackTree {
+    enum Node {
         case stack(StackCoordinatorComponent)
         case sequence(SequenceCoordinatorComponent)
         case screen(ScreenCoordinatorComponent)
 
-        public init(_ component: Component) {
+        init(_ component: Component) {
             if let stackCoordinator = component as? StackCoordinatorComponent {
                 self = .stack(stackCoordinator)
             } else if let sequenceCoordinator = component as? SequenceCoordinatorComponent {
@@ -18,7 +18,7 @@ public struct NavigationStackTree {
             }
         }
 
-        public var navigationId: CoordinatorID {
+        var navigationId: CoordinatorID {
             return switch self {
             case .stack(let component):
                 component.navigationId
@@ -29,7 +29,7 @@ public struct NavigationStackTree {
             }
         }
 
-        public var component: Component {
+        var component: Component {
             return switch self {
             case .stack(let component):
                 component

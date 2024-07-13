@@ -83,10 +83,6 @@ struct ExampleB { // Namespace
                     let presentedStack4 = await DefaultStackCoordinator(sequenceCoordinator: presentedSequence4)
                     await presentedStack3.navigationComponent.getPresentingComponent().present(stack: presentedStack4, mode: .sheet)
                 }
-
-                try? await Task.sleep(for: .seconds(3))
-                let tree = Tree.getTreeRecursive(from: Tree.Node(self))
-                print(tree.map { $0.component.tag })
             }
         }
     }

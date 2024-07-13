@@ -4,13 +4,6 @@ import SwiftUI
 public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
     public let navigationId: CoordinatorID = CoordinatorID()
     public var tag: String = "SCREEN"
-    public var children: [any Entity] {
-        if let presentingComponent = presentingComponent, let presentedEntity = presentingComponent.presentedEntity {
-            return [presentedEntity.getEntity()]
-        } else {
-            return []
-        }
-    }
 
     @Published var view: AnyView?
     @Published var presentingComponent: PresentingScreenCoordinatorComponent?
@@ -64,9 +57,27 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
         }
     }
 
+    public func currentRoutes() -> [Route] {
+        var routes: [Route] = []
+        if let presentingComponent = presentingComponent, let presentedEntity = presentingComponent.presentedEntity {
+            let transition = switch presentingComponent.presentationMode {
+            case .fullscreen: Route.Transition.fullscreen
+            case .sheet: Route.Transition.sheet
+            }
+            routes.append(Route(entity: presentedEntity.getEntity(), transition: transition))
+        } else {
+            routes.append(contentsOf: childrenEntities.map { Route(entity: $0, transition: .subview) })
+        }
+        return routes
+    }
+
+    /// Used only for custom screen views that contain childrenEntities. This allows the library to calculate the entire Tree Structure when using custom screen coordinators.
+    public var childrenEntities: [ViewEntity] = []
+
     @MainActor
     func destroyComponent() async {
         //print("Screen destroyed")
+        childrenEntities = []
         presentingComponent = nil
         view = nil
     }
