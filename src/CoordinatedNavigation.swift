@@ -4,7 +4,7 @@ import SwiftUI
 public typealias CoordinatorID = UUID
 
 public struct Route {
-    public let entity: Entity
+    public let coordinator: Coordinator
     public let transition: Transition
 
     public enum Transition {
@@ -44,30 +44,30 @@ public protocol ViewComponent: Component {
     func getView() -> AnyView
 }
 
-public protocol Entity {
+public protocol Coordinator {
     var navigationId: CoordinatorID { get }
     var component: Component { get }
 }
 
-public protocol SequenceableEntity: Entity {}
+public protocol SequenceableCoordinator: Coordinator {}
 
-public protocol ViewEntity: Entity {
+public protocol ViewCoordinator: Coordinator {
     func getView() -> AnyView
 }
 
-public protocol StackCoordinatorEntity: AnyObject, ViewEntity {
+public protocol StackCoordinator: AnyObject, ViewCoordinator {
     var navigationComponent: StackCoordinatorComponent { get }
 }
 
-public protocol SequenceCoordinatorEntity: AnyObject, SequenceableEntity {
+public protocol SequenceCoordinator: AnyObject, SequenceableCoordinator {
     var navigationComponent: SequenceCoordinatorComponent { get }
 }
 
-public protocol ScreenCoordinatorEntity: AnyObject, ViewEntity, SequenceableEntity {
+public protocol ScreenCoordinator: AnyObject, ViewCoordinator, SequenceableCoordinator {
     var navigationComponent: ScreenCoordinatorComponent { get }
 }
 
-public extension StackCoordinatorEntity {
+public extension StackCoordinator {
     var navigationId: CoordinatorID {
         navigationComponent.navigationId
     }
@@ -86,7 +86,7 @@ public extension StackCoordinatorEntity {
     }
 }
 
-public extension SequenceCoordinatorEntity {
+public extension SequenceCoordinator {
     var navigationId: CoordinatorID {
         navigationComponent.navigationId
     }
@@ -101,7 +101,7 @@ public extension SequenceCoordinatorEntity {
     }
 }
 
-public extension ScreenCoordinatorEntity {
+public extension ScreenCoordinator {
     var navigationId: CoordinatorID {
         navigationComponent.navigationId
     }
@@ -120,16 +120,16 @@ public extension ScreenCoordinatorEntity {
     }
 }
 
-public extension Entity {
+public extension Coordinator {
     var component: Component {
-        if let stackCoordinator = self as? StackCoordinatorEntity {
+        if let stackCoordinator = self as? StackCoordinator {
             return stackCoordinator.navigationComponent
-        } else if let sequenceCoordinator = self as? SequenceCoordinatorEntity {
+        } else if let sequenceCoordinator = self as? SequenceCoordinator {
             return sequenceCoordinator.navigationComponent
-        } else if let screenCoordinator = self as? ScreenCoordinatorEntity {
+        } else if let screenCoordinator = self as? ScreenCoordinator {
             return screenCoordinator.navigationComponent
         } else {
-            fatalError("Unknown Coordinator Entity Node")
+            fatalError("Unknown Coordinator Class Node")
         }
     }
 }
@@ -150,7 +150,7 @@ public extension View {
         AnyView(self)
     }
 
-    public func toScreenCoordinator() -> ScreenCoordinatorEntity {
+    public func toScreenCoordinator() -> ScreenCoordinator {
         DefaultScreenCoordinator(view: self)
     }
 }

@@ -4,7 +4,7 @@ import CoordinatedNavigation
 
 struct ExampleB { // Namespace
 
-    class RootSequenceCoordinator: SequenceCoordinatorEntity {
+    class RootSequenceCoordinator: SequenceCoordinator {
         let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
 
         enum DeeplinkExample {
@@ -87,7 +87,7 @@ struct ExampleB { // Namespace
         }
     }
 
-    class OnboardingSequenceCoordinator: SequenceCoordinatorEntity {
+    class OnboardingSequenceCoordinator: SequenceCoordinator {
         let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
 
         init() async {
@@ -100,7 +100,7 @@ struct ExampleB { // Namespace
         }
     }
 
-    class AuthenticationStackCoordinator: StackCoordinatorEntity {
+    class AuthenticationStackCoordinator: StackCoordinator {
         var navigationComponent: StackCoordinatorComponent = StackCoordinatorComponent()
 
         init() async {
@@ -109,7 +109,7 @@ struct ExampleB { // Namespace
         }
     }
 
-    class AuthenticationSequenceCoordinator: SequenceCoordinatorEntity {
+    class AuthenticationSequenceCoordinator: SequenceCoordinator {
         let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
 
         init() async {
@@ -121,7 +121,7 @@ struct ExampleB { // Namespace
         }
     }
 
-    class FeedSequenceCoordinator: SequenceCoordinatorEntity {
+    class FeedSequenceCoordinator: SequenceCoordinator {
         let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
 
         init() async {

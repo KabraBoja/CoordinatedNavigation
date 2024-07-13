@@ -4,7 +4,7 @@ import SwiftUI
 
 struct ExampleD {
 
-    public static func createAPlainTutorialScreenCoordinator() -> ScreenCoordinatorEntity {
+    public static func createAPlainTutorialScreenCoordinator() -> ScreenCoordinator {
 
         struct TutorialPlainView: View {
 
@@ -26,7 +26,7 @@ struct ExampleD {
         return DefaultScreenCoordinator(view: TutorialPlainView())
     }
 
-    public static func createACustomTutorialScreenCoordinator(onNextPressed: @escaping () -> Void) -> ScreenCoordinatorEntity {
+    public static func createACustomTutorialScreenCoordinator(onNextPressed: @escaping () -> Void) -> ScreenCoordinator {
 
         class CustomTutorialViewModel: ObservableObject {
             @Published var title: String

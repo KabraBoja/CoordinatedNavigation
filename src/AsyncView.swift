@@ -1,19 +1,19 @@
 import Foundation
 import SwiftUI
 
-/// Use this coordinator to initialize a ViewEntity using async/await.
-public class AsyncViewCoordinator<LoadingView: View>: ScreenCoordinatorEntity, ObservableObject {
+/// Use this coordinator to initialize a ViewCoordinator using async/await.
+public class AsyncViewCoordinator<LoadingView: View>: ScreenCoordinator, ObservableObject {
     public var navigationComponent: ScreenCoordinatorComponent = ScreenCoordinatorComponent()
 
-    @Published var loadedCoordinator: ViewEntity?
+    @Published var loadedCoordinator: ViewCoordinator?
     @Published var loadingView: LoadingView?
 
-    public init(loadingView: LoadingView, closure: @escaping () async -> ViewEntity) {
+    public init(loadingView: LoadingView, closure: @escaping () async -> ViewCoordinator) {
         self.loadingView = loadingView
         Task { @MainActor in
             let coordinator = await closure()
             self.loadedCoordinator = coordinator
-            navigationComponent.childrenEntities.append(coordinator)
+            navigationComponent.childrenCoordinators.append(coordinator)
             self.loadingView = nil
         }
     }

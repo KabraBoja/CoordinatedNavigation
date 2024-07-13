@@ -21,9 +21,9 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
         }
     }
 
-    enum PresentedEntity {
-        case screen(ScreenCoordinatorEntity)
-        case stack(StackCoordinatorEntity)
+    enum PresentedCoordinator {
+        case screen(ScreenCoordinator)
+        case stack(StackCoordinator)
 
         func getView() -> AnyView {
             switch self {
@@ -34,7 +34,7 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
             }
         }
 
-        func getEntity() -> ViewEntity {
+        func getCoordinator() -> ViewCoordinator {
             switch self {
             case .screen(let screen):
                 screen
@@ -59,7 +59,7 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
     }
 
     public var onUpdate: (Bool) -> Void = { _ in }
-    @Published var presentedEntity: PresentedEntity?
+    @Published var presentedCoordinator: PresentedCoordinator?
     @Published private var isPresenting: Bool = false
     @Published var presentationMode: PresentationMode = .sheet
     var parentDidAppear: Bool = false
@@ -75,7 +75,7 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
     }
 
     @MainActor
-    public func present(screen: ScreenCoordinatorEntity, mode: PresentationMode) async {
+    public func present(screen: ScreenCoordinator, mode: PresentationMode) async {
         presentationMode = mode
         if parentDidAppear {
             isPresenting = true
@@ -83,11 +83,11 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
         } else {
             initialIsPresenting = true
         }
-        presentedEntity = .screen(screen)
+        presentedCoordinator = .screen(screen)
     }
 
     @MainActor
-    public func present(stack: StackCoordinatorEntity, mode: PresentationMode) async {
+    public func present(stack: StackCoordinator, mode: PresentationMode) async {
         presentationMode = mode
         if parentDidAppear {
             isPresenting = true
@@ -95,7 +95,7 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
         } else {
             initialIsPresenting = true
         }
-        presentedEntity = .stack(stack)
+        presentedCoordinator = .stack(stack)
     }
 
     @MainActor
@@ -106,7 +106,7 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
         } else {
             initialIsPresenting = false
         }
-        presentedEntity = nil
+        presentedCoordinator = nil
     }
 
     struct PresentingView<Content: View>: View {
@@ -132,13 +132,13 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
                     }
                 }.sheet(isPresented: $coordinator.isPresenting, onDismiss: { [weak coordinator] in
                     //presentingComponent?.parent?.presentingComponent = nil
-                    let presentedEntity = coordinator?.presentedEntity
+                    let presentedCoordinator = coordinator?.presentedCoordinator
                     Task {
-                        await presentedEntity?.destroyComponent()
+                        await presentedCoordinator?.destroyComponent()
                     }
-                    coordinator?.presentedEntity = nil
+                    coordinator?.presentedCoordinator = nil
                 }, content: { [weak coordinator] in
-                    coordinator?.presentedEntity?.getView()
+                    coordinator?.presentedCoordinator?.getView()
                 })
             case .fullscreen:
                 content.onAppear {
@@ -152,13 +152,13 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
                     }
                 }.fullScreenCover(isPresented: $coordinator.isPresenting, onDismiss: { [weak coordinator] in
                     //presentingComponent?.parent?.presentingComponent = nil
-                    let presentedEntity = coordinator?.presentedEntity
+                    let presentedCoordinator = coordinator?.presentedCoordinator
                     Task {
-                        await presentedEntity?.destroyComponent()
+                        await presentedCoordinator?.destroyComponent()
                     }
-                    coordinator?.presentedEntity = nil
+                    coordinator?.presentedCoordinator = nil
                 }, content: { [weak coordinator] in
-                    coordinator?.presentedEntity?.getView()
+                    coordinator?.presentedCoordinator?.getView()
                 })
             }
         }

@@ -4,12 +4,12 @@ import SwiftUI
 
 struct ExampleC { // Namespace
 
-    class CustomTabBarCoordinator: ScreenCoordinatorEntity, ObservableObject {
+    class CustomTabBarCoordinator: ScreenCoordinator, ObservableObject {
         let navigationComponent: ScreenCoordinatorComponent = ScreenCoordinatorComponent()
 
         @Published var selectedTab: Int = 0
-        @Published var firstTabCoordinator: ViewEntity
-        @Published var secondTabCoordinator: ViewEntity
+        @Published var firstTabCoordinator: ViewCoordinator
+        @Published var secondTabCoordinator: ViewCoordinator
         @Published var wasInitialized: Bool = false
 
         init() async {
@@ -41,7 +41,7 @@ struct ExampleC { // Namespace
         }
     }
 
-    class FirstTabSequenceCoordinator: SequenceCoordinatorEntity {
+    class FirstTabSequenceCoordinator: SequenceCoordinator {
         let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
 
         init() async {

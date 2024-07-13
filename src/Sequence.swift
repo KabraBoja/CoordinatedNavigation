@@ -4,24 +4,20 @@ import SwiftUI
 public class SequenceCoordinatorComponent: ObservableObject, Component {
 
     public enum ChildCoordinator {
-        case sequence(SequenceCoordinatorEntity)
-        case screen(ScreenCoordinatorEntity)
+        case sequence(SequenceCoordinator)
+        case screen(ScreenCoordinator)
 
         public func getID() -> CoordinatorID {
             switch self {
-            case .sequence(let entity):
-                entity.navigationId
-            case .screen(let entity):
-                entity.navigationId
+            case .sequence(let coordinator): coordinator.navigationId
+            case .screen(let coordinator): coordinator.navigationId
             }
         }
 
-        public func getEntity() -> Entity {
+        public func getCoordinator() -> Coordinator {
             switch self {
-            case .sequence(let entity):
-                entity
-            case .screen(let entity):
-                entity
+            case .sequence(let coordinator): coordinator
+            case .screen(let coordinator): coordinator
             }
         }
     }
@@ -48,7 +44,7 @@ public class SequenceCoordinatorComponent: ObservableObject, Component {
 
     public func currentRoutes() -> [Route] {
         childCoordinators.map { child in
-            Route(entity: child.getEntity(), transition: .push)
+            Route(coordinator: child.getCoordinator(), transition: .push)
         }
     }
 
@@ -61,13 +57,13 @@ public class SequenceCoordinatorComponent: ObservableObject, Component {
     }
 
     @MainActor
-    public func push(screen: ScreenCoordinatorEntity) async {
+    public func push(screen: ScreenCoordinator) async {
         childCoordinators.append(.screen(screen))
         await sendEventToParent(event: .navigationPathUpdateNeeded)
     }
 
     @MainActor
-    public func push(screens: [ScreenCoordinatorEntity]) async {
+    public func push(screens: [ScreenCoordinator]) async {
         for screen in screens {
             childCoordinators.append(.screen(screen))
         }
@@ -75,7 +71,7 @@ public class SequenceCoordinatorComponent: ObservableObject, Component {
     }
 
     @MainActor
-    public func push(sequence: SequenceCoordinatorEntity) async {
+    public func push(sequence: SequenceCoordinator) async {
         sequence.navigationComponent.parent = Parent(sequence: self)
         childCoordinators.append(.sequence(sequence))
         await sendEventToParent(event: .navigationPathUpdateNeeded)
@@ -118,22 +114,22 @@ public class SequenceCoordinatorComponent: ObservableObject, Component {
     }
 
     @MainActor
-    public func pop(sequence: SequenceCoordinatorEntity) async {
+    public func pop(sequence: SequenceCoordinator) async {
         await pop(id: sequence.navigationId)
     }
 
     @MainActor
-    public func pop(screen: ScreenCoordinatorEntity) async {
+    public func pop(screen: ScreenCoordinator) async {
         await pop(id: screen.navigationId)
     }
 
     @MainActor
-    public func set(screen: ScreenCoordinatorEntity) async {
+    public func set(screen: ScreenCoordinator) async {
         await set(screens: [screen])
     }
 
     @MainActor
-    public func set(screens: [ScreenCoordinatorEntity]) async {
+    public func set(screens: [ScreenCoordinator]) async {
         let removedCoordinatorIDs = childCoordinators.map { $0.getID() }
         for screen in screens {
             childCoordinators.append(.screen(screen))
@@ -143,7 +139,7 @@ public class SequenceCoordinatorComponent: ObservableObject, Component {
     }
 
     @MainActor
-    public func set(sequence: SequenceCoordinatorEntity) async {
+    public func set(sequence: SequenceCoordinator) async {
         sequence.navigationComponent.parent = Parent(sequence: self)
         let removedCoordinatorIDs = childCoordinators.map { $0.getID() }
         childCoordinators.append(.sequence(sequence))
@@ -271,30 +267,30 @@ public class SequenceCoordinatorComponent: ObservableObject, Component {
         parent = nil
         for child in childCoordinators {
             switch child {
-            case .sequence(let sequenceCoordinatorEntity):
-                await sequenceCoordinatorEntity.navigationComponent.destroyComponent()
-            case .screen(let screenCoordinatorEntity):
-                await screenCoordinatorEntity.navigationComponent.destroyComponent()
+            case .sequence(let sequenceCoordinator):
+                await sequenceCoordinator.navigationComponent.destroyComponent()
+            case .screen(let screenCoordinator):
+                await screenCoordinator.navigationComponent.destroyComponent()
             }
         }
         childCoordinators = []
     }
 }
 
-public class DefaultSequenceCoordinator: SequenceCoordinatorEntity {
+public class DefaultSequenceCoordinator: SequenceCoordinator {
     public let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
 
     public init() {}
 
-    public init(screenCoordinator: ScreenCoordinatorEntity) async {
+    public init(screenCoordinator: ScreenCoordinator) async {
         await navigationComponent.set(screen: screenCoordinator)
     }
 
-    public init(screenCoordinators: [ScreenCoordinatorEntity]) async {
+    public init(screenCoordinators: [ScreenCoordinator]) async {
         await navigationComponent.set(screens: screenCoordinators)
     }
 
-    public init(sequenceCoordinator: SequenceCoordinatorEntity) async {
+    public init(sequenceCoordinator: SequenceCoordinator) async {
         await navigationComponent.set(sequence: sequenceCoordinator)
     }
 }

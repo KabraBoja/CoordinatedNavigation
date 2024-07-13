@@ -8,7 +8,7 @@ class DebugPrinter {
     static var printerAttached: Bool = false
 }
 
-class SimpleTitleScreenCoordinator: ScreenCoordinatorEntity {
+class SimpleTitleScreenCoordinator: ScreenCoordinator {
     let navigationComponent: ScreenCoordinatorComponent = ScreenCoordinatorComponent()
 
     init(title: String) {
@@ -36,7 +36,7 @@ class SimpleTitleScreenCoordinator: ScreenCoordinatorEntity {
     }
 }
 
-class CustomScreenCoordinator: ScreenCoordinatorEntity, ObservableObject {
+class CustomScreenCoordinator: ScreenCoordinator, ObservableObject {
 
     let navigationComponent: ScreenCoordinatorComponent = ScreenCoordinatorComponent()
 

@@ -14,7 +14,7 @@ enum PathRepresentation {
 public class StackCoordinatorComponent: ObservableObject, ViewComponent {
 
     @Published var navigationPath: NavigationPath = NavigationPath()
-    @Published var sequenceCoordinator: SequenceCoordinatorEntity?
+    @Published var sequenceCoordinator: SequenceCoordinator?
     public let navigationId: CoordinatorID = CoordinatorID()
     let presentingComponent: PresentingScreenCoordinatorComponent = PresentingScreenCoordinatorComponent()
     public var tag: String = "STACK"
@@ -27,7 +27,7 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
         self.presentingComponent.setParent(stack: self)
     }
 
-    public init(sequence: SequenceCoordinatorEntity) {
+    public init(sequence: SequenceCoordinator) {
         self.sequenceCoordinator = sequence
         self.presentingComponent.setParent(stack: self)
     }
@@ -72,7 +72,7 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
     }
 
     @MainActor
-    public func set(sequence: SequenceCoordinatorEntity) async {
+    public func set(sequence: SequenceCoordinator) async {
         await pop()
         sequence.navigationComponent.parent = SequenceCoordinatorComponent.Parent(stack: self)
         sequenceCoordinator = sequence
@@ -162,26 +162,26 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
 
     public func currentRoutes() -> [Route] {
         var routes: [Route] = []
-        if let presentedEntity = presentingComponent.presentedEntity {
+        if let presentedCoordinator = presentingComponent.presentedCoordinator {
             let transition = switch presentingComponent.presentationMode {
             case .fullscreen: Route.Transition.fullscreen
             case .sheet: Route.Transition.sheet
             }
-            routes.append(Route(entity: presentedEntity.getEntity(), transition: transition))
+            routes.append(Route(coordinator: presentedCoordinator.getCoordinator(), transition: transition))
         }
         if let sequenceCoordinator = sequenceCoordinator {
-            routes.append(Route(entity: sequenceCoordinator, transition: .stackRoot))
+            routes.append(Route(coordinator: sequenceCoordinator, transition: .stackRoot))
         }
         return routes
     }
 }
 
-public class DefaultStackCoordinator: StackCoordinatorEntity {
+public class DefaultStackCoordinator: StackCoordinator {
     public let navigationComponent: StackCoordinatorComponent = StackCoordinatorComponent()
 
     public init() {}
 
-    public init(sequenceCoordinator: SequenceCoordinatorEntity) async {
+    public init(sequenceCoordinator: SequenceCoordinator) async {
         await navigationComponent.set(sequence: sequenceCoordinator)
     }
 }

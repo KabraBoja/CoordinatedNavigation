@@ -59,31 +59,31 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
 
     public func currentRoutes() -> [Route] {
         var routes: [Route] = []
-        if let presentingComponent = presentingComponent, let presentedEntity = presentingComponent.presentedEntity {
+        if let presentingComponent = presentingComponent, let presentedCoordinator = presentingComponent.presentedCoordinator {
             let transition = switch presentingComponent.presentationMode {
             case .fullscreen: Route.Transition.fullscreen
             case .sheet: Route.Transition.sheet
             }
-            routes.append(Route(entity: presentedEntity.getEntity(), transition: transition))
+            routes.append(Route(coordinator: presentedCoordinator.getCoordinator(), transition: transition))
         } else {
-            routes.append(contentsOf: childrenEntities.map { Route(entity: $0, transition: .subview) })
+            routes.append(contentsOf: childrenCoordinators.map { Route(coordinator: $0, transition: .subview) })
         }
         return routes
     }
 
     /// Used only for custom screen views that contain childrenEntities. This allows the library to calculate the entire Tree Structure when using custom screen coordinators.
-    public var childrenEntities: [ViewEntity] = []
+    public var childrenCoordinators: [ViewCoordinator] = []
 
     @MainActor
     func destroyComponent() async {
         //print("Screen destroyed")
-        childrenEntities = []
+        childrenCoordinators = []
         presentingComponent = nil
         view = nil
     }
 }
 
-public class DefaultScreenCoordinator: ScreenCoordinatorEntity {
+public class DefaultScreenCoordinator: ScreenCoordinator {
     public let navigationComponent: ScreenCoordinatorComponent = ScreenCoordinatorComponent()
     public let storage: Any? // Use this property to hold a presenter or any other instance owned by the coordinator
 

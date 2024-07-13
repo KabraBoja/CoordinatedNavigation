@@ -4,7 +4,7 @@ import CoordinatedNavigation
 
 struct ExampleA { // Namespace
 
-    class RootSequenceCoordinator: SequenceCoordinatorEntity {
+    class RootSequenceCoordinator: SequenceCoordinator {
         let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
         let isFirstAppLaunch: Bool = true
 
@@ -20,7 +20,7 @@ struct ExampleA { // Namespace
         }
     }
 
-    class OnboardingSequenceCoordinator: SequenceCoordinatorEntity {
+    class OnboardingSequenceCoordinator: SequenceCoordinator {
 
         let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
         let onOnboardingFinished: () async -> Void
@@ -30,7 +30,7 @@ struct ExampleA { // Namespace
             await navigationComponent.set(screen: createOnboardingStep1())
         }
 
-        private func createOnboardingStep1() -> ScreenCoordinatorEntity {
+        private func createOnboardingStep1() -> ScreenCoordinator {
 
             let screenCoordinator = CustomScreenCoordinator(
                 title: "Step 1",
@@ -53,7 +53,7 @@ struct ExampleA { // Namespace
             return screenCoordinator
         }
 
-        private func createOnboardingStep2() -> ScreenCoordinatorEntity {
+        private func createOnboardingStep2() -> ScreenCoordinator {
             CustomScreenCoordinator(
                 title: "Step 2",
                 actions: [
@@ -66,7 +66,7 @@ struct ExampleA { // Namespace
             )
         }
 
-        private func createOnboardingStep3() -> ScreenCoordinatorEntity {
+        private func createOnboardingStep3() -> ScreenCoordinator {
             CustomScreenCoordinator(
                 title: "Step 3",
                 actions: [
@@ -84,14 +84,14 @@ struct ExampleA { // Namespace
         }
     }
 
-    class SearchSequenceCoordinator: SequenceCoordinatorEntity {
+    class SearchSequenceCoordinator: SequenceCoordinator {
         let navigationComponent: SequenceCoordinatorComponent = SequenceCoordinatorComponent()
 
         init() async {
             await navigationComponent.set(screen: createSearchList())
         }
 
-        private func createSearchList() -> ScreenCoordinatorEntity {
+        private func createSearchList() -> ScreenCoordinator {
             CustomScreenCoordinator(
                 title: "Search List",
                 actions: [
@@ -112,7 +112,7 @@ struct ExampleA { // Namespace
             )
         }
 
-        private func createSearchDetail(title: String) -> ScreenCoordinatorEntity {
+        private func createSearchDetail(title: String) -> ScreenCoordinator {
             let detail = CustomScreenCoordinator(
                 title: title,
                 actions: [],

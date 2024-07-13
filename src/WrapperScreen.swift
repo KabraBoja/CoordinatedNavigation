@@ -1,28 +1,31 @@
 import Foundation
 import SwiftUI
 
-public class WrapperScreenCoordinator: ScreenCoordinatorEntity {
+public class WrapperScreenCoordinator: ScreenCoordinator {
     public let navigationComponent = ScreenCoordinatorComponent()
 
+    @MainActor
     public init() async {}
 
-    public init(_ viewEntity: ViewEntity) async {
-        await setViewEntity(viewEntity)
+    @MainActor
+    public init(_ viewCoordinator: ViewCoordinator) async {
+        await setViewCoordinator(viewCoordinator)
     }
 
     @MainActor
-    public func setViewEntity(_ viewEntity: ViewEntity) async {
-        navigationComponent.childrenEntities.append(viewEntity)
-        navigationComponent.setView(viewEntity.getView())
+    public func setViewCoordinator(_ viewCoordinator: ViewCoordinator) async {
+        navigationComponent.childrenCoordinators.append(viewCoordinator)
+        navigationComponent.setView(viewCoordinator.getView())
     }
 
     @MainActor
     public func setPlainView(_ view: some View) async {
-        navigationComponent.childrenEntities.removeAll()
+        navigationComponent.childrenCoordinators.removeAll()
         navigationComponent.setView(view)
     }
 
-    public func getCurrentViewEntity() -> ViewEntity? {
-        navigationComponent.childrenEntities.first
+    @MainActor
+    public func getCurrentViewCoordinator() async -> ViewCoordinator? {
+        navigationComponent.childrenCoordinators.first
     }
 }

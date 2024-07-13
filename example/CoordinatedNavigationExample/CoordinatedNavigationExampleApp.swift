@@ -15,8 +15,8 @@ struct CoordinatedNavigationExampleApp: App {
 
     var body: some Scene {
         WindowGroup {
-            AsyncViewCoordinator(loadingView: SplashScreen()) { () -> ViewEntity in
-                let result: ViewEntity = await Task {
+            AsyncViewCoordinator(loadingView: SplashScreen()) { () -> ViewCoordinator in
+                let result: ViewCoordinator = await Task {
                     try? await Task.sleep(for: .seconds(1))
 
                     return switch exampleCase {
@@ -36,7 +36,7 @@ struct CoordinatedNavigationExampleApp: App {
                 // Timer for debugging purposes: Prints the current tree every 2 seconds.
                 Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
                     let tree = Tree.getTreeRecursive(from: result)
-                    print(tree.map { "\($0.transition.name) \($0.entity.component.tag)" })
+                    print(tree.map { "\($0.transition.name) \($0.coordinator.component.tag)" })
                 }
 
                 return result
