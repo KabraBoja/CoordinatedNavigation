@@ -71,12 +71,11 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
         return routes
     }
 
-    /// Used only for custom screen views that contain childrenEntities. This allows the library to calculate the entire Tree Structure when using custom screen coordinators.
+    /// Used only for custom screen views that contain childrenCoordinators. This allows the library to calculate the entire Tree Structure when using custom screen coordinators.
     public var childrenCoordinators: [ViewCoordinator] = []
 
     @MainActor
     func destroyComponent() async {
-        //print("Screen destroyed")
         childrenCoordinators = []
         presentingComponent = nil
         view = nil

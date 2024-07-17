@@ -173,7 +173,7 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
             routes.append(Tree.Route(coordinator: presentedCoordinator.getCoordinator(), transition: transition))
         }
         if let sequenceCoordinator = sequenceCoordinator {
-            routes.append(Tree.Route(coordinator: sequenceCoordinator, transition: .stackRoot))
+            routes.append(Tree.Route(coordinator: sequenceCoordinator, transition: .rootSequence))
         }
         return routes
     }

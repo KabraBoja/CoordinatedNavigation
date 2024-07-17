@@ -20,7 +20,7 @@ public struct Tree {
 
         public enum Transition {
             case root
-            case stackRoot
+            case rootSequence
             case push
             case sheet
             case fullscreen
@@ -30,7 +30,7 @@ public struct Tree {
             public var name: String {
                 switch self {
                 case .root: "ROOT"
-                case .stackRoot: "STACK_ROOT"
+                case .rootSequence: "ROOT_SEQUENCE"
                 case .push: "PUSH"
                 case .sheet: "SHEET"
                 case .fullscreen: "FULLSCREEN"
