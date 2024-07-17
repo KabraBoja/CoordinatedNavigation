@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 struct NavigationStackTree {
     enum Node {
@@ -98,5 +99,11 @@ struct NavigationStackTree {
         case .screen:
             return nil
         }
+    }
+}
+
+extension View {
+    func toAnyView() -> AnyView {
+        AnyView(self)
     }
 }

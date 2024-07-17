@@ -3,41 +3,15 @@ import SwiftUI
 
 public typealias CoordinatorID = UUID
 
-public struct Route {
-    public let coordinator: Coordinator
-    public let transition: Transition
-
-    public enum Transition {
-        case root
-        case stackRoot
-        case push
-        case sheet
-        case fullscreen
-        case subview
-        case custom(String)
-
-        public var name: String {
-            switch self {
-            case .root: "ROOT"
-            case .stackRoot: "STACK_ROOT"
-            case .push: "PUSH"
-            case .sheet: "SHEET"
-            case .fullscreen: "FULLSCREEN"
-            case .subview: "SUBVIEW"
-            case .custom(let string): string
-            }
-        }
-    }
-}
-
 public protocol Component {
+    /// Unique coordinator identifier.
     var navigationId: CoordinatorID { get }
 
-    /// Component name
+    /// Component optional name.
     var tag: String { get set }
 
-    /// Current routes shown in the hierarchy
-    func currentRoutes() -> [Route]
+    /// Current routes shown in the hierarchy.
+    func currentRoutes() -> [Tree.Route]
 }
 
 public protocol ViewComponent: Component {
@@ -146,9 +120,6 @@ public extension NavigationPath {
 }
 
 public extension View {
-    public func toAnyView() -> AnyView {
-        AnyView(self)
-    }
 
     public func toScreenCoordinator() -> ScreenCoordinator {
         DefaultScreenCoordinator(view: self)

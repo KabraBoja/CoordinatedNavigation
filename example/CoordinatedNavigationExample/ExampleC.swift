@@ -62,7 +62,7 @@ struct ExampleC { // Namespace
         @Published var navigationPath: NavigationPath
         @Published var selectedTab: Int = 0
 
-        let viewsDict: [UUID: AnyView]
+        let viewsDict: [UUID: Text]
 
         let id0: UUID = UUID()
         let id1: UUID = UUID()
@@ -70,16 +70,16 @@ struct ExampleC { // Namespace
 
         init() {
             viewsDict = [
-                id0: Text("Push 0").toAnyView(),
-                id1: Text("Push 1").toAnyView(),
-                id2: Text("Push 2").toAnyView()
+                id0: Text("Push 0"),
+                id1: Text("Push 1"),
+                id2: Text("Push 2"),
             ]
             navigationPath = NavigationPath([id0, id1, id2])
         }
 
-        func getTabView() -> AnyView { InTabView(coordinator: self).toAnyView() }
+        func getTabView() -> InTabView { InTabView(coordinator: self) }
 
-        func getStackView() -> AnyView { InStackView(coordinator: self).toAnyView() }
+        func getStackView() -> InStackView { InStackView(coordinator: self) }
 
         struct InTabView: View {
 

@@ -50,10 +50,12 @@ class CustomScreenCoordinator: ScreenCoordinator, ObservableObject {
     }
 
     init(title: String, actions: [Action], isBackAllowed: Bool) {
-        if !DebugPrinter.printerAttached {
-            DebugPrinter.printerAttached = true
-            Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
-                print("Init call count: \(DebugPrinter.initCount), body call count: \(DebugPrinter.bodyCount)")
+        Task { @MainActor in
+            if !DebugPrinter.printerAttached {
+                DebugPrinter.printerAttached = true
+                Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
+                    print("Init call count: \(DebugPrinter.initCount), body call count: \(DebugPrinter.bodyCount)")
+                }
             }
         }
 

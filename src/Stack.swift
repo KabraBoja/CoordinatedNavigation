@@ -21,7 +21,7 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
 
     private var wasInitialized: Bool = false
     private var updatePathNeeded: Bool = false
-    private var lastOnDisappearPath: String = ""
+//    private var lastOnDisappearPath: String = ""
 
     public init() {
         self.presentingComponent.setParent(stack: self)
@@ -52,11 +52,14 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
                         firstView.navigationDestination(for: UUID.self) { item in
                             coordinator.getCoordinatorView(item).onDisappear {
                                 Task { @MainActor in
+                                    // Trying optimization
+                                    //                                    let tree = NavigationStackTree.getTreeRecursive(from: NavigationStackTree.Node(coordinator))
+                                    //try! await Task.sleep(for: .microseconds(10))
                                     let path = coordinator.navigationPath.getPathRepresentation()
-                                    if path != coordinator.lastOnDisappearPath {
-                                        coordinator.lastOnDisappearPath = path
-                                        await coordinator.removeUnusedCoordinators(path: path)
-                                    }
+                                    //if path != coordinator.lastOnDisappearPath {
+                                    //                                        coordinator.lastOnDisappearPath = path
+                                    await coordinator.removeUnusedCoordinators(path: path)
+                                    //}
                                 }
                             }
                         }
@@ -160,17 +163,17 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
         await pop()
     }
 
-    public func currentRoutes() -> [Route] {
-        var routes: [Route] = []
+    public func currentRoutes() -> [Tree.Route] {
+        var routes: [Tree.Route] = []
         if let presentedCoordinator = presentingComponent.presentedCoordinator {
             let transition = switch presentingComponent.presentationMode {
-            case .fullscreen: Route.Transition.fullscreen
-            case .sheet: Route.Transition.sheet
+            case .fullscreen: Tree.Route.Transition.fullscreen
+            case .sheet: Tree.Route.Transition.sheet
             }
-            routes.append(Route(coordinator: presentedCoordinator.getCoordinator(), transition: transition))
+            routes.append(Tree.Route(coordinator: presentedCoordinator.getCoordinator(), transition: transition))
         }
         if let sequenceCoordinator = sequenceCoordinator {
-            routes.append(Route(coordinator: sequenceCoordinator, transition: .stackRoot))
+            routes.append(Tree.Route(coordinator: sequenceCoordinator, transition: .stackRoot))
         }
         return routes
     }

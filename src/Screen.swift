@@ -57,16 +57,16 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
         }
     }
 
-    public func currentRoutes() -> [Route] {
-        var routes: [Route] = []
+    public func currentRoutes() -> [Tree.Route] {
+        var routes: [Tree.Route] = []
         if let presentingComponent = presentingComponent, let presentedCoordinator = presentingComponent.presentedCoordinator {
             let transition = switch presentingComponent.presentationMode {
-            case .fullscreen: Route.Transition.fullscreen
-            case .sheet: Route.Transition.sheet
+            case .fullscreen: Tree.Route.Transition.fullscreen
+            case .sheet: Tree.Route.Transition.sheet
             }
-            routes.append(Route(coordinator: presentedCoordinator.getCoordinator(), transition: transition))
+            routes.append(Tree.Route(coordinator: presentedCoordinator.getCoordinator(), transition: transition))
         } else {
-            routes.append(contentsOf: childrenCoordinators.map { Route(coordinator: $0, transition: .subview) })
+            routes.append(contentsOf: childrenCoordinators.map { Tree.Route(coordinator: $0, transition: .subview) })
         }
         return routes
     }

@@ -42,9 +42,9 @@ public class SequenceCoordinatorComponent: ObservableObject, Component {
     var parent: Parent?
     var childCoordinators: [ChildCoordinator] = []
 
-    public func currentRoutes() -> [Route] {
+    public func currentRoutes() -> [Tree.Route] {
         childCoordinators.map { child in
-            Route(coordinator: child.getCoordinator(), transition: .push)
+            Tree.Route(coordinator: child.getCoordinator(), transition: .push)
         }
     }
 
@@ -167,11 +167,11 @@ public class SequenceCoordinatorComponent: ObservableObject, Component {
         childCoordinators.count
     }
 
-    public func getChildrenIDs() -> [CoordinatorID] {
+    public func childrenIDs() -> [CoordinatorID] {
         childCoordinators.map { $0.getID() }
     }
 
-    public func getChildren() -> [ChildCoordinator] {
+    public func children() -> [ChildCoordinator] {
         childCoordinators
     }
 

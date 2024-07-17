@@ -4,39 +4,50 @@ import CoordinatedNavigation
 @main
 struct CoordinatedNavigationExampleApp: App {
 
-    enum ExampleCase {
-        case exampleA
-        case exampleB
-        case exampleC
-        case exampleD
-    }
+    let mainCoordinator: ViewCoordinator
 
-    let exampleCase: ExampleCase = .exampleB
+    init() {
+        mainCoordinator = AsyncViewCoordinator(loadingView: SplashScreen()) { () -> ViewCoordinator in
+            // Simulate long operation
+            try! await Task.sleep(for: .seconds(1))
+            let viewCoordinator: ViewCoordinator = await ExampleCase.exampleB.createCoordinator()
+
+            // Timer for debugging purposes: Prints the current tree every 2 seconds.
+            Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [viewCoordinator] _ in
+                let treeString = Tree.printTree(from: viewCoordinator) { node in
+                    "\(node.route.transition.name) \(node.route.coordinator.component.tag)"
+                }
+                print(treeString)
+            }
+
+            return viewCoordinator
+        }
+    }
 
     var body: some Scene {
         WindowGroup {
-            AsyncViewCoordinator(loadingView: SplashScreen()) { () -> ViewCoordinator in
-                let viewCoordinator: ViewCoordinator = switch exampleCase {
-                case .exampleA:
-                    await DefaultStackCoordinator(sequenceCoordinator: ExampleA.RootSequenceCoordinator())
-                case .exampleB:
-                    await DefaultStackCoordinator(sequenceCoordinator: ExampleB.RootSequenceCoordinator())
-                case .exampleC:
-                    await ExampleC.CustomTabBarCoordinator()
-                case .exampleD:
-                    ExampleD.createACustomTutorialScreenCoordinator { print("Next pressed") }
-                }
-
-                // Timer for debugging purposes: Prints the current tree every 2 seconds.
-                Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
-                    let tree = Tree.getTreeRecursive(from: viewCoordinator)
-                    print(tree.map { "\($0.transition.name) \($0.coordinator.component.tag)" })
-                }
-
-                return viewCoordinator
-            }.getView()
+            mainCoordinator.getView()
         }
     }
 }
 
+enum ExampleCase {
+    case exampleA
+    case exampleB
+    case exampleC
+    case exampleD
 
+    @MainActor
+    func createCoordinator() async -> ViewCoordinator {
+        switch self {
+        case .exampleA:
+            await DefaultStackCoordinator(sequenceCoordinator: ExampleA.RootSequenceCoordinator())
+        case .exampleB:
+            await DefaultStackCoordinator(sequenceCoordinator: ExampleB.RootSequenceCoordinator())
+        case .exampleC:
+            await ExampleC.CustomTabBarCoordinator()
+        case .exampleD:
+            ExampleD.createACustomTutorialScreenCoordinator { print("Next pressed") }
+        }
+    }
+}

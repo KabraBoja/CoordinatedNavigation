@@ -60,6 +60,109 @@ Why use a coordinator for a simple screen (view)?
 - The coordinator could be in charge of holding a reference to a Presenter or a ViewModel. Or even be used as the ObservableObject.
 - Serves as a good abstraction when working with modules/service locators. Clients will know about the existance of a ScreenCoordinator only, but not which view/presentation classes are being used.
 
+## Examples:
+
+Here you can find some examples about how to use the library.
+
+### Creating a Screen using a ScreenCoordinator
+
+Let's start creating a simple SwfitUI view named **ActionsView**. This view is initialized with a title and an array of actions (each one represented by a button). These actions will allow us to make our view call some closures (for example purposes). The view also sets the navigationTitle with the title, this way if we push it into an NavigationStack the navigation title will be shown as well.
+
+```
+struct ActionsView: View {
+
+    let title: String
+    let actions: [Action]
+
+    struct Action {
+        let title: String
+        let action: () -> Void
+    }
+
+    init(title: String, actions: [Action]) {
+        self.title = title
+        self.actions = actions
+    }
+
+    var body: some View {
+        VStack {
+            Text(title).font(.title)
+            ForEach(actions, id: \.title) { action in
+                Button(action: {
+                    action.action()
+                }, label: {
+                    Text(action.title).font(.callout)
+                })
+            }
+        }.navigationTitle(title)
+    }
+}
+
+``` 
+
+If we want to add our ActionsView into our navigation structure we need to create an ScreenCoordinator that holds the view. An ScreenCoordinator is just a protocol that must be implemented by a class. For simple view initializations we can use the default ScreenCoordinator:
+
+```
+let screenCoordinator: ScreenCoordinator = DefaultScreenCoordinator(view: ActionsView(title: "Plain View", actions: []))
+```
+
+or
+
+```
+let screenCoordinator: ScreenCoordinator = ActionsView(title: "Plain View", actions: []).toScreenCoordinator()
+```
+
+But we can also create our custom ScreenCoordinators in case we want a more complex logic / architecture / storage... The ScreenCoordinator protocol conforms to AnyObject so it can also be an ObservableObject if required. For the sake of the example, let's assume we are following an MVVM architecture pattern in our project, and we need to store a ViewModel object outside of the view (maybe for testing purposes we want it to be injected).
+
+Let's update our ActionsView to use a ViewModel (ObservedObject) and then create the custom ScreenCoordinator:
+
+```
+struct ActionsView: View {
+
+    struct Action {
+        let title: String
+        let action: () -> Void
+    }
+
+    class ViewModel: ObservableObject {
+        
+        @Published var title: String
+        @Published var actions: [Action]
+
+        init(title: String, actions: [Action]) {
+            self.title = title
+            self.actions = actions
+        }
+    }
+
+    @ObservedObject var viewModel: ViewModel
+
+    var body: some View {
+        VStack {
+            Text(viewModel.title).font(.title)
+            ForEach(viewModel.actions, id: \.title) { action in
+                Button(action: {
+                    action.action()
+                }, label: {
+                    Text(action.title).font(.callout)
+                })
+            }
+        }.navigationTitle(viewModel.title)
+    }
+}
+
+class ActionsViewScreenCoordinator: ScreenCoordinator {
+    let navigationComponent: ScreenCoordinatorComponent
+    let viewModel: ActionsView.ViewModel
+
+    init() {
+        // We can perform our complex initialization logic here if needed. Could also be async.
+        viewModel = ActionsView.ViewModel(title: "Actions View", actions: [])
+        navigationComponent = ScreenCoordinatorComponent(view: ActionsView(viewModel: viewModel))
+    }
+}
+```
+
 ## Next Steps?
 
 - [x] Upload an example project.

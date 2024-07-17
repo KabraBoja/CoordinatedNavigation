@@ -19,6 +19,7 @@
 		51AA34712BC54BA30033316C /* ExampleA.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51AA34702BC54BA30033316C /* ExampleA.swift */; };
 		51AA34732BC54BD80033316C /* ExampleCommon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51AA34722BC54BD80033316C /* ExampleCommon.swift */; };
 		51AA34752BC574EA0033316C /* ExampleB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51AA34742BC574EA0033316C /* ExampleB.swift */; };
+		51CFCFA32C4334D000887BA4 /* HowToUse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CFCFA22C4334D000887BA4 /* HowToUse.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		51AA34702BC54BA30033316C /* ExampleA.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleA.swift; sourceTree = "<group>"; };
 		51AA34722BC54BD80033316C /* ExampleCommon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleCommon.swift; sourceTree = "<group>"; };
 		51AA34742BC574EA0033316C /* ExampleB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleB.swift; sourceTree = "<group>"; };
+		51CFCFA22C4334D000887BA4 /* HowToUse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HowToUse.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +107,7 @@
 			isa = PBXGroup;
 			children = (
 				51251E392BA2054F0058BB0A /* CoordinatedNavigationExampleApp.swift */,
+				51CFCFA22C4334D000887BA4 /* HowToUse.swift */,
 				51AA34702BC54BA30033316C /* ExampleA.swift */,
 				51AA34742BC574EA0033316C /* ExampleB.swift */,
 				51531C1F2BD5A17C00B39395 /* ExampleC.swift */,
@@ -278,6 +281,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				51AA34712BC54BA30033316C /* ExampleA.swift in Sources */,
+				51CFCFA32C4334D000887BA4 /* HowToUse.swift in Sources */,
 				51AA34732BC54BD80033316C /* ExampleCommon.swift in Sources */,
 				51251E3A2BA2054F0058BB0A /* CoordinatedNavigationExampleApp.swift in Sources */,
 				51531C202BD5A17C00B39395 /* ExampleC.swift in Sources */,
