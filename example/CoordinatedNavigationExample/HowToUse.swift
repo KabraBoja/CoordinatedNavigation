@@ -2,6 +2,21 @@ import Foundation
 import SwiftUI
 import CoordinatedNavigation
 
+public struct TitleView: View {
+
+    public let title: String
+
+    public init(title: String) {
+        self.title = title
+    }
+
+    public var body: some View {
+        Text(title)
+            .font(.title)
+            .navigationTitle(title)
+    }
+}
+
 struct ActionsView: View {
 
     struct Action {
