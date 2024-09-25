@@ -2,21 +2,27 @@
 
 Coordinated Navigation is a Swift library that enables **navigating** between screens using a navigation **tree structure** where every node doesn’t need to know each other.
 
-Implemented in SwiftUI (iOS 16 **Navigation Stack**) uses a **Coordinator Pattern** approach.
+Implemented in SwiftUI (using iOS 16 **Navigation Stack**) following the **Coordinator Pattern** approach.
 
 ## Why?
 
-As a developer I've faced many projects where the navigation responsibility is not well structured or clear enough. My aim with this library is to stablish this responsibility in a much clear way. When we don't have a good navigation structure, we are not able to reuse screens or funnels inside our app. I also wanted to be able to reuse this navigation funnels as much as I could. That's why I came up with a **Tree Structure** solution.
+As a developer I've faced many projects where the navigation logic is not structured in a way where navigation funnels can be reused in a flexible way. That's why I came up with a **Tree Structure** solution.
 
 ![Example](./ExampleCoordinatorsApp.jpg)
 
-Organizing our navigation into a Tree, where we have branch nodes (sequence coordinators) and leaf nodes (screen coordinators) allows us to create a funnel with its own transitions, and reuse this funnel wherever we need. For example let's assume we need an Authentication funnel which consists of showing a Login Screen and then possible navigations (pushes) to a Register Screen or to a Forgotten Password Screen.
+Organizing our navigation into a Tree, where we have branch nodes (sequence coordinators) and leaf nodes (screen coordinators) allows us to isolate funnels with its own transitions, and reuse them wherever we need.
 
-*TODO: Add Authentication module example image*
+For example let's assume we need an Authentication funnel which consists of showing a Login Screen and then possible navigations (pushes) to a Register Screen or to a Forgotten Password Screen.
 
-We want to be able to push this funnel inside an existing horizontal navigation (NavigationStack) or be able to present it modally (Present). While keeping this funnel agnostic of previous existing funnels. This specific behaviour is challenging due how SwiftUI works internally, as the horizontal navigation in SwiftUI involves modifyng the NavigationStack's path. With the use of Sequence Coordinators, we can split the navigation logic into different Sequences and maintain a very reusable navigation code.
+![Authentication](./ExampleAuthenticationSequence.png)
 
- The Tree Structure forces the coordinators to always be responsible of their **own funnel** and their **direct children** only. This helps us to follow the **single responsibility principle** in our navigation.
+Isolating this funnel in an Authentication Sequence coordinator allows us to push this funnel into an existing Navigation Stack (horizontal navigation) and also to present it modally (vertical navigation).
+
+Without this library this specific behaviour is challenging due how SwiftUI works internally, as the horizontal navigation in SwiftUI involves modifyng the NavigationStack's path and the vertical navigation involves adding a sheet or a fullscreen modifier into the current SwiftUI view.
+
+This library allows us to concatenate sequences into our NavigationStack without having to deal with its internal path modifications. Each sequence can be managed by itself and performs its own transitions resulting in a decoupled Tree Structure.
+
+Also, the Tree Structure forces the coordinators to always be responsible of their **own funnel** and their **direct children** only. This helps us to follow the **single responsibility principle** in our navigation.
 
 ## How it works?
 
@@ -25,8 +31,6 @@ In order to arrange our views and navigation logic into a tree structure we will
 - Screen Coordinator
 - Sequence Coordinator
 - Stack Coordinator
-
-*TODO: Explain the difference between horizontal navigation and vertical navigation.*
 
 ### Screen Coordinator
 
@@ -58,20 +62,61 @@ A Stack Coordinator shows a NavigationStack view (horizontal navigation).
 - It's used as the entry point of the app or a modal presentation.
 - Can only **SET or POP** a Sequence.
 
-In order to show the content of the tree structure a Sequence Coordinator (root of the tree) must be setted into an Stack Coordinator. This will show the resulting tree content inside a NavigationStack view. It will show all the pushed Screen Coordinators (leaf nodes) as if we perform a **Depth-first search** in the tree. It will animate the changes automatically (same as if we were using a NavigationStack or a UINavigationController but respecting the current tree structure).
+In order to show the content of the tree structure a Sequence Coordinator (root of the tree) must be setted into an Stack Coordinator. This will unwrap the tree content inside a NavigationStack view. It will show all the pushed Screen Coordinators (leaf nodes) as if we perform a **Depth-first search** in the tree. It will animate the changes automatically (same as if we were using a NavigationStack or a UINavigationController but respecting the current tree structure).
 
-
-## Using
-
-- Composition over inheritance
-- Async / Await
-- Presentation
-- AnyView
-
-
-## Examples:
+## How to use:
 
 Here you can find some examples about how to use the library.
+
+### Creating a simple Screen Coordinator
+
+Let's start creating a simple SwfitUI view named **TitleView**. This view receives a title string and sets a Text in the middle of the screen and also sets the navigationTitle, this way if we use it into an Stack the navigation title will be shown as well.
+
+```
+import SwiftUI
+import CoordinatedNavigation
+
+struct TitleView: View {
+
+    let title: String
+
+    init(title: String) {
+        self.title = title
+    }
+
+    var body: some View {
+        Text(title)
+            .navigationTitle(title)
+    }
+}
+```
+
+Now that we have a TitleView, as an example, let's create one with the title "Splash Screen". Let's create its own Screen Coordinator using one of the next approaches:
+
+```
+// 1. Using the default screen coordinator.
+let screenCoordinator: ScreenCoordinator = DefaultScreenCoordinator(view: TitleView(title: "Splash Screen"))
+
+// 2. Using the default screen coordinator sugar method.
+let screenCoordinator: ScreenCoordinator = TitleView(title: "Splash Screen").toScreenCoordinator()
+
+// 3. Creating a custom screen coordinator in case we want a more complex lifecycle.
+class SplashScreenCoordinator: ScreenCoordinator {
+    let navigationComponent = ScreenCoordinatorComponent()
+
+    init() {
+        navigationComponent.setView(TitleView(title: "Splash Screen"))
+    }
+}
+
+let screenCoordinator: ScreenCoordinator = SplashScreenCoordinator()
+```
+
+### Creating a Sequence Coordinator
+
+Let's create an example Authentication Sequence. The Sequence will start showing a Login Screen and then, from this screen, the user can navigate to a Register Screen or to a Forgot Password Screen.
+
+
 
 ### Creating a Screen using a ScreenCoordinator
 
@@ -171,6 +216,13 @@ class ActionsViewScreenCoordinator: ScreenCoordinator {
     }
 }
 ```
+
+## Using
+
+- Composition over inheritance
+- Async / Await
+- Presentation
+- AnyView
 
 ## Next Steps?
 

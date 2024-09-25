@@ -17,6 +17,16 @@ public struct TitleView: View {
     }
 }
 
+class TitleViewCoordinator: ScreenCoordinator {
+    let navigationComponent = ScreenCoordinatorComponent()
+
+    init() {
+        navigationComponent.setView(TitleView(title: "Splash Screen"))
+    }
+}
+
+let screenCoordinator: ScreenCoordinator = TitleViewCoordinator()
+
 struct ActionsView: View {
 
     struct Action {
@@ -58,6 +68,17 @@ class ActionsViewScreenCoordinator: ScreenCoordinator {
     init() {
         viewModel = ActionsView.ViewModel(title: "Actions View", actions: [])
         navigationComponent = ScreenCoordinatorComponent(view: ActionsView(viewModel: viewModel))
+    }
+}
+
+struct HowToUse {
+    func createSequenceCoordinator() async -> SequenceCoordinator {
+        let sequenceCoordinator = await DefaultSequenceCoordinator(screenCoordinators: [
+            TitleView(title: "First screen").toScreenCoordinator(),
+            TitleView(title: "Second screen").toScreenCoordinator(),
+            TitleView(title: "Third screen").toScreenCoordinator(),
+        ])
+        return sequenceCoordinator
     }
 }
 
