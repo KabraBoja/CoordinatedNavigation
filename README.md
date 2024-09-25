@@ -114,11 +114,28 @@ let screenCoordinator: ScreenCoordinator = SplashScreenCoordinator()
 
 ### Creating a Sequence Coordinator
 
-Let's create an example Authentication Sequence. The Sequence will start showing a Login Screen and then, from this screen, the user can navigate to a Register Screen or to a Forgot Password Screen.
+Let's create the previous example Authentication Sequence. The Sequence will start showing a Login Screen and then, from this screen, the user can navigate to a Register Screen or to a Forgot Password Screen.
+
+First, we create the Login View (Login screen).
+
+`TODO: Login View Code`
+
+Then we create the Register view (Register screen) and the Forgot Password view (Forgot Password screen).
+
+`TODO: Register View & Forgot Password View Code`
+
+Now let's create the Sequence that defines the navigation between them. The library is really flexible so we can create it using two different approaches:
+
+1: Using the Default Sequence Coordinator class.
+
+`TODO: Sequence Coordinator Code`
+
+2: Creating a Custom Sequence Coordinator class.
+
+`TODO: Sequence Coordinator Code`
 
 
-
-### Creating a Screen using a ScreenCoordinator
+### Creating a more complex custom ScreenCoordinator
 
 Let's start creating a simple SwfitUI view named **ActionsView**. This view is initialized with a title and an array of actions (each one represented by a button). These actions will allow us to make our view call some closures (for example purposes). The view also sets the navigationTitle with the title, this way if we push it into an NavigationStack the navigation title will be shown as well.
 
@@ -233,4 +250,5 @@ class ActionsViewScreenCoordinator: ScreenCoordinator {
 - [x] Rename Entities to Coordinators.
 - [ ] Add a proper how to use README section.
 - [ ] Try to use any View instead of AnyView.
+- [ ] Search a better naming for the Screen and ScreenCoordinator.
 - [ ] Explore if I can merge the Stack with the Sequence.
