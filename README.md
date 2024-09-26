@@ -116,120 +116,144 @@ let screenCoordinator: ScreenCoordinator = SplashScreenCoordinator()
 
 Let's create the previous example Authentication Sequence. The Sequence will start showing a Login Screen and then, from this screen, the user can navigate to a Register Screen or to a Forgot Password Screen.
 
-First, we create the Login View (Login screen).
+First, we create the example Login View (Login screen).
 
-`TODO: Login View Code`
+```
+struct LoginView: View {
 
-Then we create the Register view (Register screen) and the Forgot Password view (Forgot Password screen).
+    // Navigation is never done in the view, it's always delegated to the parent sequence (in this case using a closure).
+    enum Output {
+        case registerButtonPressed
+        case forgotPasswordButtonPressed
+    }
 
-`TODO: Register View & Forgot Password View Code`
+    let output: (Output) async -> Void
+
+    // Assume we are using a view model or whatever you need to keep your state and your behaviour
+    @State private var username: String = ""
+    @State private var password: String = ""
+
+    var body: some View {
+        VStack(spacing: 16.0) {
+            TextField("Username", text: $username)
+            SecureField("Password", text: $password)
+
+            Button("Login") {
+                // Assume an internal logic is called (no navigation needed)
+            }
+
+            Button("Register") {
+                Task { await output(.registerButtonPressed) }
+            }
+
+            Button("Forgot password?") {
+                Task { await output(.forgotPasswordButtonPressed) }
+            }
+
+            Spacer()
+        }
+        .navigationTitle("Login screen")
+    }
+}
+
+```
+
+For the Register screen and the Forgot Password screen examples we will use the previous TitleView.
 
 Now let's create the Sequence that defines the navigation between them. The library is really flexible so we can create it using two different approaches:
 
 1: Using the Default Sequence Coordinator class.
 
-`TODO: Sequence Coordinator Code`
+```
+func createAuthenticationSequenceCoordinator() async -> SequenceCoordinator {
+    let sequenceCoordinator = DefaultSequenceCoordinator()
+
+    let loginScreen = await LoginView(output: { action in
+        switch action {
+        case .registerButtonPressed:
+            let registerScreen = await TitleView(title: "Register screen").toScreenCoordinator()
+            await sequenceCoordinator.navigationComponent.push(screen: registerScreen)
+        case .forgotPasswordButtonPressed:
+            let forgotPasswordScreen = await TitleView(title: "Forgot password screen").toScreenCoordinator()
+            await sequenceCoordinator.navigationComponent.push(screen: forgotPasswordScreen)
+        }
+    }).toScreenCoordinator()
+
+    await sequenceCoordinator.navigationComponent.set(screen: loginScreen)
+
+    return sequenceCoordinator
+}
+
+let authenticationSequenceCoordinator = await createAuthenticationSequenceCoordinator()
+```
 
 2: Creating a Custom Sequence Coordinator class.
 
-`TODO: Sequence Coordinator Code`
-
-
-### Creating a more complex custom ScreenCoordinator
-
-Let's start creating a simple SwfitUI view named **ActionsView**. This view is initialized with a title and an array of actions (each one represented by a button). These actions will allow us to make our view call some closures (for example purposes). The view also sets the navigationTitle with the title, this way if we push it into an NavigationStack the navigation title will be shown as well.
-
 ```
-struct ActionsView: View {
+class AuthenticationSequenceCoordinator: SequenceCoordinator {
+    let navigationComponent = SequenceCoordinatorComponent()
 
-    let title: String
-    let actions: [Action]
-
-    struct Action {
-        let title: String
-        let action: () -> Void
+    init() async {
+        await navigationComponent.set(screen: createLoginScreen())
     }
 
-    init(title: String, actions: [Action]) {
-        self.title = title
-        self.actions = actions
-    }
-
-    var body: some View {
-        VStack {
-            Text(title).font(.title)
-            ForEach(actions, id: \.title) { action in
-                Button(action: {
-                    action.action()
-                }, label: {
-                    Text(action.title).font(.callout)
-                })
+    func createLoginScreen() async -> ScreenCoordinator {
+        await LoginView(output: { action in
+            switch action {
+            case .registerButtonPressed:
+                await self.navigationComponent.push(screen: self.createRegisterScreen())
+            case .forgotPasswordButtonPressed:
+                await self.navigationComponent.push(screen: self.createForgotPasswordScreen())
             }
-        }.navigationTitle(title)
+        }).toScreenCoordinator()
+    }
+
+    func createRegisterScreen() async -> ScreenCoordinator {
+        await TitleView(title: "Register screen").toScreenCoordinator()
+    }
+
+    func createForgotPasswordScreen() async -> ScreenCoordinator {
+        await TitleView(title: "Forgot password screen").toScreenCoordinator()
     }
 }
 
-``` 
-
-If we want to add our ActionsView into our navigation structure we need to create an ScreenCoordinator that holds the view. An ScreenCoordinator is just a protocol that must be implemented by a class. For simple view initializations we can use the default ScreenCoordinator:
-
-```
-let screenCoordinator: ScreenCoordinator = DefaultScreenCoordinator(view: ActionsView(title: "Plain View", actions: []))
+let authenticationSequenceCoordinator = await AuthenticationSequenceCoordinator()
 ```
 
-or
+
+### Creating a Stack Coordinator
+
+Once we have a sequence coordinator implemented, the Stack Coordinator is the one in charge of creates the root view (which uses a SwiftUI Navigation Stack internally) and holds the tree structure.
+
+In the following example we will use the previous AuthenticationSequenceCoordinator as our root.
 
 ```
-let screenCoordinator: ScreenCoordinator = ActionsView(title: "Plain View", actions: []).toScreenCoordinator()
+func createRootStackCoordinator() async -> StackCoordinator {
+    let authenticationSequenceCoordinator = await createAuthenticationSequenceCoordinator()
+    return await DefaultStackCoordinator(sequenceCoordinator: authenticationSequenceCoordinator)
+}
 ```
 
-But we can also create our custom ScreenCoordinators in case we want a more complex logic / architecture / storage... The ScreenCoordinator protocol conforms to AnyObject so it can also be an ObservableObject if required. For the sake of the example, let's assume we are following an MVVM architecture pattern in our project, and we need to store a ViewModel object outside of the view (maybe for testing purposes we want it to be injected).
-
-Let's update our ActionsView to use a ViewModel (ObservedObject) and then create the custom ScreenCoordinator:
+Then we can use the StackCoordinator as a SwiftUI view, calling the `getView()` method. For example we can call it from our AppDelegate or our WindowGroup. As we are using async/await to keep up to date with the new iOS concurrency checks the library provides a loading view (AsyncViewCoordinator) so we can initialize our view in a safe way while we show an Splash screen.
 
 ```
-struct ActionsView: View {
+@main
+struct ExampleApp: App {
 
-    struct Action {
-        let title: String
-        let action: () -> Void
-    }
+    let mainCoordinator: ViewCoordinator
 
-    class ViewModel: ObservableObject {
-        
-        @Published var title: String
-        @Published var actions: [Action]
-
-        init(title: String, actions: [Action]) {
-            self.title = title
-            self.actions = actions
+    init() {
+        mainCoordinator = AsyncViewCoordinator(loadingView: TitleView(title: "Splash Screen")) {
+            // Initialization time (simulates long operation)
+            try! await Task.sleep(for: .seconds(2))
+            await createRootStackCoordinator()
         }
     }
 
-    @ObservedObject var viewModel: ViewModel
-
-    var body: some View {
-        VStack {
-            Text(viewModel.title).font(.title)
-            ForEach(viewModel.actions, id: \.title) { action in
-                Button(action: {
-                    action.action()
-                }, label: {
-                    Text(action.title).font(.callout)
-                })
-            }
-        }.navigationTitle(viewModel.title)
-    }
-}
-
-class ActionsViewScreenCoordinator: ScreenCoordinator {
-    let navigationComponent: ScreenCoordinatorComponent
-    let viewModel: ActionsView.ViewModel
-
-    init() {
-        // We can perform our complex initialization logic here if needed. Could also be async.
-        viewModel = ActionsView.ViewModel(title: "Actions View", actions: [])
-        navigationComponent = ScreenCoordinatorComponent(view: ActionsView(viewModel: viewModel))
+    var body: some Scene {
+        WindowGroup {
+            mainCoordinator.getView()
+        }
     }
 }
 ```
@@ -248,7 +272,7 @@ class ActionsViewScreenCoordinator: ScreenCoordinator {
 - [x] Modal Presentation could also happen from the Stack coordinator.
 - [x] Tree structure representation, supporting custom Screen Coordinators.
 - [x] Rename Entities to Coordinators.
-- [ ] Add a proper how to use README section.
+- [x] Add a proper how to use README section.
 - [ ] Try to use any View instead of AnyView.
 - [ ] Search a better naming for the Screen and ScreenCoordinator.
 - [ ] Explore if I can merge the Stack with the Sequence.

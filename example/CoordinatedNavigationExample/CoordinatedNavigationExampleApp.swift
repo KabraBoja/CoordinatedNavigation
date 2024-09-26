@@ -7,7 +7,7 @@ struct CoordinatedNavigationExampleApp: App {
     let mainCoordinator: ViewCoordinator
 
     init() {
-        mainCoordinator = AsyncViewCoordinator(loadingView: SplashScreen()) { () -> ViewCoordinator in
+        mainCoordinator = AsyncViewCoordinator(loadingView: SplashScreen()) {
             // Simulate long operation
             try! await Task.sleep(for: .seconds(1))
             let viewCoordinator: ViewCoordinator = await ExampleCase.exampleB.createCoordinator()
