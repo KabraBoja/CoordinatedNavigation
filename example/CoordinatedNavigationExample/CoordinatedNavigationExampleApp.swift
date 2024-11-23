@@ -10,10 +10,10 @@ struct CoordinatedNavigationExampleApp: App {
         mainCoordinator = AsyncViewCoordinator(loadingView: SplashScreen()) {
             // Simulate long operation
             try! await Task.sleep(for: .seconds(1))
-            let viewCoordinator: ViewCoordinator = await ExampleCase.exampleB.createCoordinator()
+            let viewCoordinator: ViewCoordinator = await ExampleCase.uiTest.createCoordinator()
 
             // Timer for debugging purposes: Prints the current tree every 2 seconds.
-            Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [viewCoordinator] _ in
+            Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { [viewCoordinator] _ in
                 let treeString = Tree.printTree(from: viewCoordinator) { node in
                     "\(node.route.transition.name) \(node.route.coordinator.component.tag)"
                 }
@@ -32,6 +32,7 @@ struct CoordinatedNavigationExampleApp: App {
 }
 
 enum ExampleCase {
+    case uiTest
     case exampleA
     case exampleB
     case exampleC
@@ -40,14 +41,18 @@ enum ExampleCase {
     @MainActor
     func createCoordinator() async -> ViewCoordinator {
         switch self {
+        case .uiTest:
+            let stackCoordinator = TestStackCoordinator()
+            await stackCoordinator.executeSteps([.pushSequence, .pushScreen])
+            return stackCoordinator
         case .exampleA:
-            await DefaultStackCoordinator(sequenceCoordinator: ExampleA.RootSequenceCoordinator())
+            return await DefaultStackCoordinator(sequenceCoordinator: ExampleA.RootSequenceCoordinator())
         case .exampleB:
-            await DefaultStackCoordinator(sequenceCoordinator: ExampleB.RootSequenceCoordinator())
+            return await DefaultStackCoordinator(sequenceCoordinator: ExampleB.RootSequenceCoordinator())
         case .exampleC:
-            await ExampleC.CustomTabBarCoordinator()
+            return await ExampleC.CustomTabBarCoordinator()
         case .exampleD:
-            ExampleD.createACustomTutorialScreenCoordinator { print("Next pressed") }
+            return ExampleD.createACustomTutorialScreenCoordinator { print("Next pressed") }
         }
     }
 }

@@ -3,15 +3,18 @@ import SwiftUI
 
 public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
     public let navigationId: CoordinatorID = CoordinatorID()
+    public let presentingComponent = PresentingScreenCoordinatorComponent()
     public var tag: String = "SCREEN"
 
     @Published var view: AnyView?
-    @Published var presentingComponent: PresentingScreenCoordinatorComponent?
     @Published private var wasInitialized: Bool = false
 
-    public init() {}
+    public init() {
+        self.presentingComponent.setParent(screen: self)
+    }
 
-    public init(view: some View) {
+    public convenience init(view: some View) {
+        self.init()
         self.view = view.toAnyView()
     }
 
@@ -23,28 +26,12 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
         self.view = view.toAnyView()
     }
 
-    @MainActor
-    public func getPresentingComponent() async -> PresentingScreenCoordinatorComponent {
-        if let presentingComponent = presentingComponent {
-            return presentingComponent
-        } else {
-            let presentingComponent = PresentingScreenCoordinatorComponent()
-            presentingComponent.setParent(screen: self)
-            self.presentingComponent = presentingComponent
-            return presentingComponent
-        }
-    }
-
     struct ContentView: View {
         @ObservedObject var coordinator: ScreenCoordinatorComponent
 
         var body: some View {
-            if coordinator.wasInitialized, let presentingComponent = coordinator.presentingComponent {
-                PresentingScreenCoordinatorComponent.PresentingView(coordinator: presentingComponent, content: getView())
-            } else {
-                getView().task {
-                    coordinator.wasInitialized = true
-                }
+            PresentingScreenCoordinatorComponent.PresentingView(coordinator: coordinator.presentingComponent, content: getView()).task {
+                coordinator.wasInitialized = true
             }
         }
 
@@ -59,7 +46,7 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
 
     public func currentRoutes() -> [Tree.Route] {
         var routes: [Tree.Route] = []
-        if let presentingComponent = presentingComponent, let presentedCoordinator = presentingComponent.presentedCoordinator {
+        if let presentedCoordinator = presentingComponent.presentedCoordinator {
             let transition = switch presentingComponent.presentationMode {
             case .fullscreen: Tree.Route.Transition.fullscreen
             case .sheet: Tree.Route.Transition.sheet
@@ -77,7 +64,6 @@ public class ScreenCoordinatorComponent: ObservableObject, ViewComponent {
     @MainActor
     func destroyComponent() async {
         childrenCoordinators = []
-        presentingComponent = nil
         view = nil
     }
 }

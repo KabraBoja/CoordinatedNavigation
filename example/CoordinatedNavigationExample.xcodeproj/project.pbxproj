@@ -13,9 +13,9 @@
 		51251E412BA205500058BB0A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 51251E402BA205500058BB0A /* Preview Assets.xcassets */; };
 		51251E4B2BA205500058BB0A /* CoordinatedNavigationExampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51251E4A2BA205500058BB0A /* CoordinatedNavigationExampleTests.swift */; };
 		51251E552BA205500058BB0A /* CoordinatedNavigationExampleUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51251E542BA205500058BB0A /* CoordinatedNavigationExampleUITests.swift */; };
-		51251E572BA205500058BB0A /* CoordinatedNavigationExampleUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51251E562BA205500058BB0A /* CoordinatedNavigationExampleUITestsLaunchTests.swift */; };
 		51321FDB2BD1539600DE29C2 /* CoordinatedNavigation in Frameworks */ = {isa = PBXBuildFile; productRef = 51321FDA2BD1539600DE29C2 /* CoordinatedNavigation */; };
 		51531C202BD5A17C00B39395 /* ExampleC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51531C1F2BD5A17C00B39395 /* ExampleC.swift */; };
+		516389EF2CEA18BB00B5E1EE /* TestScreenCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 516389EE2CEA18BB00B5E1EE /* TestScreenCoordinator.swift */; };
 		51AA34712BC54BA30033316C /* ExampleA.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51AA34702BC54BA30033316C /* ExampleA.swift */; };
 		51AA34732BC54BD80033316C /* ExampleCommon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51AA34722BC54BD80033316C /* ExampleCommon.swift */; };
 		51AA34752BC574EA0033316C /* ExampleB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51AA34742BC574EA0033316C /* ExampleB.swift */; };
@@ -49,8 +49,8 @@
 		51251E4A2BA205500058BB0A /* CoordinatedNavigationExampleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatedNavigationExampleTests.swift; sourceTree = "<group>"; };
 		51251E502BA205500058BB0A /* CoordinatedNavigationExampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoordinatedNavigationExampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		51251E542BA205500058BB0A /* CoordinatedNavigationExampleUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatedNavigationExampleUITests.swift; sourceTree = "<group>"; };
-		51251E562BA205500058BB0A /* CoordinatedNavigationExampleUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatedNavigationExampleUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		51531C1F2BD5A17C00B39395 /* ExampleC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleC.swift; sourceTree = "<group>"; };
+		516389EE2CEA18BB00B5E1EE /* TestScreenCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestScreenCoordinator.swift; sourceTree = "<group>"; };
 		51AA34702BC54BA30033316C /* ExampleA.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleA.swift; sourceTree = "<group>"; };
 		51AA34722BC54BD80033316C /* ExampleCommon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleCommon.swift; sourceTree = "<group>"; };
 		51AA34742BC574EA0033316C /* ExampleB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleB.swift; sourceTree = "<group>"; };
@@ -113,6 +113,7 @@
 				51531C1F2BD5A17C00B39395 /* ExampleC.swift */,
 				5115F4452BE12A48008AB8A0 /* ExampleD.swift */,
 				51AA34722BC54BD80033316C /* ExampleCommon.swift */,
+				516389EE2CEA18BB00B5E1EE /* TestScreenCoordinator.swift */,
 				51251E3D2BA205500058BB0A /* Assets.xcassets */,
 				51251E3F2BA205500058BB0A /* Preview Content */,
 			);
@@ -139,7 +140,6 @@
 			isa = PBXGroup;
 			children = (
 				51251E542BA205500058BB0A /* CoordinatedNavigationExampleUITests.swift */,
-				51251E562BA205500058BB0A /* CoordinatedNavigationExampleUITestsLaunchTests.swift */,
 			);
 			path = CoordinatedNavigationExampleUITests;
 			sourceTree = "<group>";
@@ -282,6 +282,7 @@
 			files = (
 				51AA34712BC54BA30033316C /* ExampleA.swift in Sources */,
 				51CFCFA32C4334D000887BA4 /* HowToUse.swift in Sources */,
+				516389EF2CEA18BB00B5E1EE /* TestScreenCoordinator.swift in Sources */,
 				51AA34732BC54BD80033316C /* ExampleCommon.swift in Sources */,
 				51251E3A2BA2054F0058BB0A /* CoordinatedNavigationExampleApp.swift in Sources */,
 				51531C202BD5A17C00B39395 /* ExampleC.swift in Sources */,
@@ -302,7 +303,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				51251E572BA205500058BB0A /* CoordinatedNavigationExampleUITestsLaunchTests.swift in Sources */,
 				51251E552BA205500058BB0A /* CoordinatedNavigationExampleUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

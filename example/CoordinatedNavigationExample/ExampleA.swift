@@ -43,9 +43,12 @@ struct ExampleA { // Namespace
                     await navigationComponent.push(screen: self.createOnboardingStep2())
                 }),
                 CustomScreenCoordinator.Action(id: "Login", closure: { [weak screenCoordinator] in
+                    print("login action")
                     guard let screenCoordinator else { return }
-                    await screenCoordinator.navigationComponent.getPresentingComponent().present(
-                        stack: DefaultStackCoordinator(sequenceCoordinator: RootSequenceCoordinator()),
+
+                    let loginSequenceCoordinator = await DefaultSequenceCoordinator(screenCoordinator: DefaultScreenCoordinator(view: Text("Login")))
+                    await screenCoordinator.navigationComponent.presentingComponent.present(
+                        stack: DefaultStackCoordinator(sequenceCoordinator: loginSequenceCoordinator),
                         mode: .sheet
                     )
                 })
@@ -121,7 +124,7 @@ struct ExampleA { // Namespace
             detail.actions = [
                 CustomScreenCoordinator.Action(id: "Detail Map", closure: { [weak detail] in
                     guard let detail else { return }
-                    await detail.navigationComponent.getPresentingComponent().present(
+                    await detail.navigationComponent.presentingComponent.present(
                         screen: SimpleTitleScreenCoordinator(title: "Detail Map"),
                         mode: .sheet
                     )

@@ -16,20 +16,19 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
     @Published var navigationPath: NavigationPath = NavigationPath()
     @Published var sequenceCoordinator: SequenceCoordinator?
     public let navigationId: CoordinatorID = CoordinatorID()
-    let presentingComponent: PresentingScreenCoordinatorComponent = PresentingScreenCoordinatorComponent()
+    public let presentingComponent = PresentingScreenCoordinatorComponent()
     public var tag: String = "STACK"
 
     private var wasInitialized: Bool = false
     private var updatePathNeeded: Bool = false
-//    private var lastOnDisappearPath: String = ""
 
     public init() {
         self.presentingComponent.setParent(stack: self)
     }
 
-    public init(sequence: SequenceCoordinator) {
+    public convenience init(sequence: SequenceCoordinator) {
+        self.init()
         self.sequenceCoordinator = sequence
-        self.presentingComponent.setParent(stack: self)
     }
 
     public func getView() -> AnyView {
@@ -151,11 +150,6 @@ public class StackCoordinatorComponent: ObservableObject, ViewComponent {
             return screenCoordinator.getView()
         }
         return nil
-    }
-
-    @MainActor
-    public func getPresentingComponent() async -> PresentingScreenCoordinatorComponent {
-        presentingComponent
     }
 
     @MainActor

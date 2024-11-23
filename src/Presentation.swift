@@ -131,14 +131,13 @@ public class PresentingScreenCoordinatorComponent: ObservableObject {
                         }
                     }
                 }.sheet(isPresented: $coordinator.isPresenting, onDismiss: { [weak coordinator] in
-                    //presentingComponent?.parent?.presentingComponent = nil
                     let presentedCoordinator = coordinator?.presentedCoordinator
                     Task {
                         await presentedCoordinator?.destroyComponent()
                     }
                     coordinator?.presentedCoordinator = nil
                 }, content: { [weak coordinator] in
-                    coordinator?.presentedCoordinator?.getView()
+                    return coordinator?.presentedCoordinator?.getView()
                 })
             case .fullscreen:
                 content.onAppear {
